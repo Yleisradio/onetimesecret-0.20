@@ -956,6 +956,91 @@
 									"body": "{\n  \"value\": \"reference #/components/schemas/SecretDataApiResponse not found in the OpenAPI spec\"\n}"
 								}
 							]
+						},
+						{
+							"name": "/v1/secret/:secret_key (anon)",
+							"id": "12aad38c-b182-4d5b-b5ca-e6a428502dca",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/v1/secret/:secret_key",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"secret",
+										":secret_key"
+									],
+									"variable": [
+										{
+											"key": "secret_key",
+											"value": "28zi06bh9ilgyw4ncu49q9a8s0166hu",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"id": "d90bf5fc-c770-44dd-9a3e-7b3143540bef",
+									"name": "Successful response",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"description": "Added as a part of security scheme: basic",
+												"key": "Authorization",
+												"value": "Basic <credentials>"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/v1/secret/:secret_key",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"v1",
+												"secret",
+												":secret_key"
+											],
+											"variable": [
+												{
+													"key": "secret_key"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"responseTime": null,
+									"body": "{\n  \"value\": \"reference #/components/schemas/SecretDataApiResponse not found in the OpenAPI spec\"\n}"
+								}
+							]
 						}
 					],
 					"id": "9f915deb-56fa-4030-baea-1bfe37492450"
@@ -1395,7 +1480,7 @@
 									"urlencoded": [
 										{
 											"key": "secret",
-											"value": "",
+											"value": "vanlue ",
 											"type": "text"
 										}
 									]
