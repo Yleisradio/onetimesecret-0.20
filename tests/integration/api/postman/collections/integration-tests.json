@@ -875,7 +875,7 @@
 							]
 						},
 						{
-							"name": "/v1/secret/:secret_key Copy",
+							"name": "/v1/secret/:secret_key (authenticated)",
 							"id": "894e4290-251d-43cd-9943-00d1d2afc11d",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
