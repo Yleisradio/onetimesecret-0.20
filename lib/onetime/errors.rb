@@ -3,6 +3,11 @@
 module Onetime
 
   class Problem < RuntimeError
+    attr_accessor :message
+
+    def initialize(message = nil)
+      @message = message
+    end
   end
 
   class RecordNotFound < Problem
@@ -12,7 +17,7 @@ module Onetime
   end
 
   class FormError < Problem
-    attr_accessor :form_fields, :message
+    attr_accessor :form_fields
   end
 
   class BadShrimp < Problem

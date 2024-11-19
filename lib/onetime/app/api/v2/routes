@@ -8,6 +8,11 @@ POST   /account/domains/add                  Onetime::App::APIV2::Domains#add_do
 POST   /account/domains/:domain/remove       Onetime::App::APIV2::Domains#remove_domain
 GET    /account/domains/:domain              Onetime::App::APIV2::Domains#get_domain
 POST   /account/domains/:domain/verify       Onetime::App::APIV2::Domains#verify_domain
+PUT    /account/domains/:domain/brand        Onetime::App::APIV2::Domains#update_domain_brand
+DELETE /account/domains/:domain/logo         Onetime::App::APIV2::Domains#delete_domain_logo
+POST   /account/domains/:domain/logo         Onetime::App::APIV2::Domains#update_domain_logo
+GET    /account/domains/:domain/logo         Onetime::App::APIV2::Domains#get_domain_logo
+GET    /account/domains/:domain/brand        Onetime::App::APIV2::Domains#get_domain_brand
 GET    /account/domains                      Onetime::App::APIV2::Domains#list_domains
 GET    /account                              Onetime::App::APIV2::Account#get_account
 
@@ -28,6 +33,7 @@ GET    /version                              Onetime::App::APIV2#version
 POST   /validate-shrimp                      Onetime::App::APIV2#get_validate_shrimp
 
 POST   /feedback                             Onetime::App::APIV2#receive_feedback
+POST   /exception                            Onetime::App::APIV2#receive_exception
 
 GET    /altcha/challenge                     Onetime::App::APIV2::Challenges#altcha_challenge
 POST   /altcha/verify                        Onetime::App::APIV2::Challenges#altcha_verify

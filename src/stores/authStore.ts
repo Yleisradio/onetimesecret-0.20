@@ -1,7 +1,8 @@
-import router from '@/router'
-import { Customer, CheckAuthDataApiResponse, CheckAuthDetails } from '@/types/onetime'
-import axios from 'axios'
-import { defineStore } from 'pinia'
+
+import { CheckAuthDataApiResponse, CheckAuthDetails, Customer } from '@/types/onetime';
+
+import axios, { AxiosError } from 'axios';
+import { defineStore } from 'pinia';
 
 /**
  * Backoff Logic Summary:
@@ -69,6 +70,8 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     /** Indicates whether the user is currently authenticated. */
     isAuthenticated: false,
+    /** Add loading state */
+    isCheckingAuth: false,
     /** The currently authenticated customer, if any. */
     customer: undefined as Customer | undefined,
     /** Timeout for periodic authentication checks. */
@@ -77,55 +80,187 @@ export const useAuthStore = defineStore('auth', {
     currentBackoffInterval: BASE_AUTH_CHECK_INTERVAL_MS,
     /** Number of consecutive failed auth checks. */
     failedAuthChecks: 0,
+    lastAuthCheck: 0,
   }),
+  getters: {
+    isAuthStale(): boolean {
+      return Date.now() - this.lastAuthCheck > BASE_AUTH_CHECK_INTERVAL_MS;
+    },
+  },
   actions: {
     /**
-     * Sets the authentication status and manages the auth check interval.
-     * @param status - The new authentication status.
+     * Initializes the auth store.
+     * Sets up the Axios interceptor, visibility listener, sets initial auth state, and customer data.
      */
-    setAuthenticated(status: boolean) {
-      this.isAuthenticated = status
-      if (status) {
-        this.startAuthCheck()
-      } else {
-        this.stopAuthCheck()
+    initialize() {
+      this.setupAxiosInterceptor();
+      this.setupVisibilityListener();
+
+      // Ensure boolean value and log
+      const initialAuthState = Boolean(window.authenticated ?? false);
+
+      this.isAuthenticated = initialAuthState;
+
+      if (window.cust) {
+        this.setCustomer(window.cust as Customer);
+      }
+
+      // Set initial lastAuthCheck if we start authenticated
+      if (this.isAuthenticated) {
+        this.lastAuthCheck = Date.now();
       }
     },
 
     /**
-     * Sets the current customer.
-     * @param customer - The customer object to set.
+     * Sets up a visibility change listener to check auth status when tab becomes visible
+     * after being inactive for a while.
      */
-    setCustomer(customer: Customer | undefined) {
-      this.customer = customer
+    setupVisibilityListener() {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && this.isAuthStale) {
+          this.refreshAuthState();
+        }
+      });
     },
 
     /**
      * Checks the current authentication status with the server.
-     * Implements exponential backoff on failures and resets on success.
+     *
+     * @description
+     * This method implements a robust authentication check mechanism:
+     * 1. Exponential backoff: Increases wait time between checks on consecutive failures.
+     * 2. Graceful degradation: Handles authentication failures with increasing severity.
+     * 3. Auto-recovery: Resets failure count and backoff interval on successful checks.
+     *
+     * Key behaviors:
+     * - Immediate logout on 401 or 403 status codes.
+     * - Applies exponential backoff for 500+ status codes.
+     * - Logs out the user after 3 failed attempts.
+     * - Resets failed check counter on success.
+     *
+     * Implications:
+     *  + Allows immediate recovery after a successful check
+     *  + Prevents accumulation of sporadic failures over time
+     *  - May not accurately represent patterns of intermittent failures
+     *  - Could potentially hide underlying issues if failures are frequent
+     *    but not consecutive
      */
     async checkAuthStatus() {
+      // If we already know we're not authenticated, don't make a request
+      if (!this.isAuthenticated) {
+        return false;
+      }
+
       try {
-        const response = await axios.get<CheckAuthDataApiResponse & CheckAuthDetails>(AUTH_CHECK_ENDPOINT)
-        this.isAuthenticated = response.data.details.authorized;
+        const response = await axios.get<CheckAuthDataApiResponse & CheckAuthDetails>(AUTH_CHECK_ENDPOINT);
+
+        this.isAuthenticated = Boolean(response.data.details.authenticated);
         this.customer = response.data.record;
+
         this.failedAuthChecks = 0;
         this.currentBackoffInterval = BASE_AUTH_CHECK_INTERVAL_MS;
-      } catch (error) {
-        this.failedAuthChecks++;
-        this.currentBackoffInterval = Math.min(
-          this.currentBackoffInterval * Math.pow(2, this.failedAuthChecks),
-          MAX_AUTH_CHECK_INTERVAL_MS
-        );
-        if (this.failedAuthChecks >= 3) {
-          this.logout()
-        } else {
-          // Set isAuthenticated to false on any error, even if not logging out
-          this.isAuthenticated = false;
-          this.customer = undefined;
-        }
+        this.lastAuthCheck = Date.now();
+
+      } catch (error: unknown) {
+        console.error('Auth check error:', error);
+        this.handleAuthCheckError(error);
+
       } finally {
-        this.startAuthCheck(); // Schedule the next check
+        if (this.isAuthenticated) {
+          this.startAuthCheck();
+        }
+      }
+
+      return this.isAuthenticated;
+    },
+
+    // Add method to force refresh auth state
+    async refreshAuthState() {
+      await this.checkAuthStatus();
+    },
+
+    /**
+     * Applies exponential backoff to the current check interval.
+     * Doubles the interval on each consecutive failure, up to MAX_AUTH_CHECK_INTERVAL_MS.
+     */
+    applyBackoff() {
+      this.currentBackoffInterval = Math.min(
+        this.currentBackoffInterval * Math.pow(2, this.failedAuthChecks),
+        MAX_AUTH_CHECK_INTERVAL_MS
+      );
+    },
+
+    /**
+     * Handles authentication check errors with specific responses based on error type.
+     *
+     * Error handling strategy:
+     * - 401/403: Immediate auth state update (unauthorized/forbidden)
+     * - 500+: Apply exponential backoff for server errors
+     * - After 3 consecutive failures: Force logout
+     *
+     * @param error - The error object from the failed auth check
+     */
+    handleAuthCheckError(error: unknown) {
+      this.failedAuthChecks++;
+
+      // Type guard and detailed error logging
+      if (!(error instanceof AxiosError)) {
+        console.error('Unexpected auth check error type:', error);
+        this.isAuthenticated = false;
+        return;
+      }
+
+      const statusCode = error.response?.status;
+      const errorMessage = error.response?.data?.message || error.message;
+
+      // Log detailed error information
+      console.error('Auth check failed:', {
+        statusCode,
+        message: errorMessage,
+        failedAttempts: this.failedAuthChecks,
+      });
+
+      // Handle specific HTTP status codes
+      switch (statusCode) {
+        case 401:
+        case 403:
+          // Authentication or authorization failure
+          return this.$logout();
+
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+          // Server-side errors: apply backoff strategy
+          this.applyBackoff();
+          this.isAuthenticated = false;
+          break;
+
+        default:
+          return this.$logout();
+      }
+
+      // Force logout after repeated failures - move this check to the top
+      if (this.failedAuthChecks >= 3) {
+        console.warn('Auth check failed 3 times, forcing logout');
+        this.$logout();
+        return;
+      }
+
+    },
+
+    /**
+     * Handles HTTP error responses, logging out the user if the status is 401 or 403.
+     * This function can be extended to handle additional status codes as needed.
+     *
+     * @param error - The error object containing the HTTP response.
+     */
+    handleHttpError(error: AxiosError, withPessimism?: boolean): void {
+      const status = error.response?.status || 0;
+      const logoutStatuses = [401, 403];
+
+      if (logoutStatuses.includes(status) || withPessimism) {
+        this.logout();
       }
     },
 
@@ -134,11 +269,8 @@ export const useAuthStore = defineStore('auth', {
      * Stops auth checks and redirects to the signin page.
      */
     logout() {
-      this.isAuthenticated = false
-      this.customer = undefined
-      this.stopAuthCheck()
-      // Perform any additional logout actions (e.g., clearing local storage, cookies)
-      router.push('/signin')
+      // Use the global logout function
+      this.$logout();
     },
 
     /**
@@ -148,7 +280,6 @@ export const useAuthStore = defineStore('auth', {
     startAuthCheck() {
       this.stopAuthCheck(); // Clear any existing interval
       const intervalMillis = this.getFuzzyAuthCheckInterval();
-      console.debug(`Starting auth check interval: ${intervalMillis}ms`);
 
       this.authCheckInterval = setTimeout(() => {
         this.checkAuthStatus();
@@ -174,8 +305,8 @@ export const useAuthStore = defineStore('auth', {
      */
     stopAuthCheck() {
       if (this.authCheckInterval !== null) {
-        clearTimeout(this.authCheckInterval)
-        this.authCheckInterval = null
+        clearTimeout(this.authCheckInterval);
+        this.authCheckInterval = null;
       }
     },
 
@@ -187,97 +318,31 @@ export const useAuthStore = defineStore('auth', {
       axios.interceptors.response.use(
         (response) => response,
         (error) => {
-          if (error.response && error.response.status === 401) {
-            this.logout()
-          }
-          return Promise.reject(error)
+          this.handleHttpError(error);
+          return Promise.reject(error);
         }
-      )
+      );
     },
 
     /**
-     * Initializes the auth store.
-     * Sets up the Axios interceptor, sets initial auth state, and customer data.
+     * Sets the authentication status and manages the auth check interval.
+     * @param status - The new authentication status.
      */
-    initialize() {
-      this.setupAxiosInterceptor()
-      const initialAuthState = window.authenticated ?? false
-      this.setAuthenticated(initialAuthState)
-
-      if (window.cust) {
-        this.setCustomer(window.cust as Customer)
+    setAuthenticated(status: boolean) {
+      this.isAuthenticated = status;
+      if (status) {
+        this.startAuthCheck();
+      } else {
+        this.stopAuthCheck();
       }
-    }
+    },
+
+    /**
+     * Sets the current customer.
+     * @param customer - The customer object to set.
+     */
+    setCustomer(customer: Customer | undefined) {
+      this.customer = customer;
+    },
   }
 })
-
-/**
- * ABOUT PINIA'S storeToRefs
- *
- * The use of `storeToRefs` is an important concept in Pinia, and it's
- * worth explaining why you might want to use it:
- *
- * 1. Reactivity preservation:
- *    When you destructure properties directly from a Pinia store, you lose
- *    their reactivity. This means changes to these properties won't trigger
- *    re-renders in your components.
- *
- * 2. `storeToRefs` solution:
- *    `storeToRefs` is a utility function provided by Pinia that allows you
- *    to destructure reactive properties from the store while maintaining
- *    their reactivity.
- *
- * Here's an example to illustrate the difference:
- *
- * import { useAuthStore } from '@/stores/authStore'
- * import { storeToRefs } from 'pinia'
- *
- * // In a Vue component setup function or script setup
- * const authStore = useAuthStore()
- *
- * // Without storeToRefs (loses reactivity):
- * const { isAuthenticated, customer } = authStore
- * // Changes to isAuthenticated or customer won't trigger component updates
- *
- * // With storeToRefs (maintains reactivity):
- * const { isAuthenticated, customer } = storeToRefs(authStore)
- * // Changes to isAuthenticated or customer will trigger component updates
- *
- *
- * You would want to use `storeToRefs` in scenarios where:
- *
- * 1. You prefer destructured syntax for cleaner code.
- * 2. You need to use these properties in template expressions or computed
- *    properties.
- * 3. You want to pass these properties to child components while maintaining
- *    reactivity.
- *
- * Here's an example of how you might use it in a component:
- *
- * ```vue
- * <script setup lang="ts">
- * import { useAuthStore } from '@/stores/authStore'
- * import { storeToRefs } from 'pinia'
- *
- * const authStore = useAuthStore()
- * const { isAuthenticated, customer } = storeToRefs(authStore)
- *
- * // Now you can use isAuthenticated and customer reactively in your template
- * // or in computed properties
- * </script>
- *
- * <template>
- *   <div v-if="isAuthenticated">
- *     Welcome, {{ customer?.name }}!
- *   </div>
- * </template>
- * ```
- *
- * In this setup, changes to `isAuthenticated` or `customer` in the store
- * will automatically update your component's view.
- *
- * It's worth noting that you don't need to use `storeToRefs` for methods or
- * non-reactive properties. You can destructure those directly from the store
- * without losing functionality.
- *
- */

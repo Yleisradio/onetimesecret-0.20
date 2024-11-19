@@ -14,6 +14,20 @@ export interface BaseApiRecord {
   updated: string;
 }
 
+export interface BrandSettings {
+  logo: string;
+  image_encoded: string;
+  image_content_type: string;
+  image_filename: string;
+  primary_color: string;
+  instructions_pre_reveal: string;
+  instructions_reveal: string;
+  instructions_post_reveal: string;
+  button_text_light: boolean;
+  font_family: string;
+  corner_style: string;
+}
+
 // Define the customer model
 export interface Customer extends BaseApiRecord {
   custid: string;
@@ -114,6 +128,7 @@ export interface CustomDomain extends BaseApiRecord {
   display_domain: string;
   base_domain: string;
   subdomain: string;
+  is_apex: boolean;
   trd: string;
   tld: string;
   sld: string;
@@ -122,6 +137,7 @@ export interface CustomDomain extends BaseApiRecord {
   txt_validation_host: string;
   txt_validation_value: string;
   vhost?: ApproximatedVHost;
+  brand?: BrandSettings;
 }
 
 export interface CustomDomainCluster extends BaseApiRecord {
@@ -131,6 +147,7 @@ export interface CustomDomainCluster extends BaseApiRecord {
   type: string;
   cluster_ip: string;
   cluster_name: string;
+  cluster_host: string;
   vhost_target: string;
 }
 
@@ -224,7 +241,8 @@ export interface SecretData extends BaseApiRecord {
   share_domain: string;
   is_owner: boolean;
   has_passphrase: boolean;
-  secret_value?: string;
+  secret_value: string;
+  secret?: string;
 }
 
 export interface SecretDetails extends DetailsType {
@@ -248,10 +266,11 @@ export interface ConcealDetails {
 }
 
 export interface CheckAuthData extends Customer {
+  last_login?: number
 }
 
 export interface CheckAuthDetails {
-  authorized: boolean;
+  authenticated: boolean;
 }
 
 export interface Feedback {
@@ -324,6 +343,7 @@ export type MetadataDataApiResponse = ApiRecordResponse<MetadataData>;
 export type SecretDataApiResponse = ApiRecordResponse<SecretData>;
 export type ConcealDataApiResponse = ApiRecordResponse<ConcealData>;
 export type CheckAuthDataApiResponse = ApiRecordResponse<CheckAuthData>;
+export type BrandSettingsApiResponse = ApiRecordResponse<BrandSettings>;
 
 /**
  * Front-end Vue App
@@ -373,6 +393,7 @@ export interface Secret extends BaseApiRecord {
   custid: string;
   state: string;
   value: string;
+  secret_value?: string;
   metadata_key: string;
   original_size: number;
   value_checksum: string;
@@ -382,4 +403,35 @@ export interface Secret extends BaseApiRecord {
   verification: string;
   is_truncated: boolean;
   maxviews: number; // always 1 (here for backwards compat)
+}
+
+
+
+
+export interface AsyncDataResult<T> {
+  data: T | null;
+  error: string | null;
+  status: number | null;
+}
+
+export interface LayoutProps {
+  displayMasthead?: boolean;
+  displayNavigation?: boolean;
+  displayLinks?: boolean;
+  displayFeedback?: boolean;
+  displayVersion?: boolean;
+  displayPoweredBy?: boolean;
+  displayToggles?: boolean;
+}
+
+// Modify the Vue Router module augmentation
+import 'vue-router';
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean;
+    layout?: Component;
+    layoutProps?: LayoutProps;
+    initialData?: AsyncDataResult<unknown>;
+  }
 }

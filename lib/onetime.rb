@@ -21,6 +21,7 @@ require 'storable'
 require 'sysinfo'
 
 require_relative 'onetime/core_ext'
+require_relative 'refinements/horreum_refinements'
 
 # Ensure immediate flushing of stdout to improve real-time logging visibility.
 # This is particularly useful in development and production environments where
@@ -45,11 +46,11 @@ module Onetime
 
   module ClassMethods
     attr_accessor :mode
-    attr_reader :conf, :locales, :instance, :sysinfo, :emailer, :global_secret
+    attr_reader :conf, :locales, :instance, :sysinfo, :emailer, :global_secret, :global_banner
     attr_writer :debug
 
     def debug
-      @debug || ((@debug.nil? && ENV['ONETIME_DEBUG'].to_s == 'true') || ENV['ONETIME_DEBUG'].to_i == 1)
+      @debug ||= ENV['ONETIME_DEBUG'].to_s.match?(/^(true|1)$/i)
     end
 
     def debug?
@@ -84,7 +85,8 @@ module Onetime
       load_fortunes
       load_plans
       connect_databases
-      print_banner unless mode?(:test)
+      check_global_banner
+      print_log_banner unless mode?(:test)
 
       @conf # return the config
 
@@ -143,7 +145,12 @@ module Onetime
       OT::Utils.fortunes ||= File.readlines(File.join(Onetime::HOME, 'etc', 'fortunes'))
     end
 
-    def print_banner
+    def check_global_banner
+      @global_banner = Familia.redis(0).get('global_banner')
+      OT.li "Global banner: #{OT.global_banner}" if global_banner
+    end
+
+    def print_log_banner
       redis_info = Familia.redis.info
       OT.li "---  ONETIME #{OT.mode} v#{OT::VERSION.inspect}  #{'---' * 3}"
       OT.li "system: #{@sysinfo.platform} (ruby #{RUBY_VERSION})"
@@ -175,14 +182,38 @@ module Onetime
       OT::Plan.load_plans!
     end
 
+    using Familia::HorreumRefinements
+
+    # Connects each model to its configured Redis database.
+    #
+    # This method retrieves the Redis database configurations from the application
+    # settings and establishes connections for each model class within the Familia
+    # module. It assigns the appropriate Redis connection to each model and verifies
+    # the connection by sending a ping command. Detailed logging is performed at each
+    # step to facilitate debugging and monitoring.
+    #
+    # @example
+    #   connect_databases
+    #
+    # @return [void]
+    #
     def connect_databases
-      # Make sure we're able to connect to separate Redis databases. Some
-      # services provide only db 0 and this is a good way to check early.
-      16.times { |idx|
-        uri = Familia.redis.id
-        ping_result = Familia.redis(idx).ping
-        OT.ld "Connecting to #{uri} (#{ping_result})"
-      }
+      # Connect each model to its configured Redis database
+      dbs = OT.conf.dig(:redis, :dbs)
+
+      OT.ld "[connect_databases] dbs: #{dbs}"
+
+      # Map model classes to their database numbers
+      Familia.members.each do |model_class|
+        model_sym = model_class.to_sym
+        db_index = dbs[model_sym] || DATABASE_IDS[model_sym] || 0 # see models.rb
+
+        # Assign a Redis connection to the model class
+        model_class.redis = Familia.redis(db_index)
+        ping_result = model_class.redis.ping
+
+        OT.ld "Connected #{model_sym} to DB #{db_index} (#{ping_result})"
+      end
     end
 
     def load_locales(locales = OT.conf[:locales] || ['en'])

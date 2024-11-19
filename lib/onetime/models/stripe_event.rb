@@ -4,7 +4,6 @@ class Onetime::StripeEvent < Familia::Horreum
   feature :safe_dump
   feature :expiration
 
-  db 10
   ttl 5.years
   prefix :stripeevent
 
@@ -33,9 +32,9 @@ class Onetime::StripeEvent < Familia::Horreum
   end
 
   def destroy! *args
-    super
-    # Remove
-    OT::StripeEvent.values.rem identifier
+    ret = super
+    OT::StripeEvent.values.remove identifier
+    ret
   end
 
   module ClassMethods

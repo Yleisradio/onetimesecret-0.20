@@ -15,7 +15,7 @@ require 'rack/mock'
 require 'onetime'
 
 # Use the default config file for tests
-OT::Config.path = File.join(__dir__, '..', 'config.test.yaml')
+OT::Config.path = File.join(Onetime::HOME, 'tests', 'unit', 'ruby', 'config.test.yaml')
 OT.boot! :test
 
 # Initialize the Rack application and create a mock request
@@ -84,8 +84,11 @@ response = @mock_request.post('/signup')
 
 ## With auth disabled, dashboard returns 401
 response = @mock_request.get('/dashboard')
+# This is a 400 response b/c authentication is disabled in
+# the config. A protected endpoint (like /dashboard which is
+# for customers_only) returns disabled_response.
 response.status
-#=> 401
+#=> 400
 
 # API v1 Routes
 

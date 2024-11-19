@@ -1,17 +1,31 @@
-import { setActivePinia, createPinia } from 'pinia'
-import { useAuthStore } from '@/stores/authStore'
-import { describe, beforeEach, it, expect, vi, afterEach } from 'vitest'
-import axios from 'axios'
-
-
-
-import router from '@/router'
-import { Customer, Plan } from '@/types/onetime'
+import { useAuthStore } from '@/stores/authStore';
+import { logoutPlugin } from '@/stores/plugins/logoutPlugin';
+import { Customer, Plan } from '@/types/onetime';
+import axios, {AxiosError} from 'axios';
+import { createPinia, Pinia, setActivePinia } from 'pinia';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createApp } from 'vue';
+import { Router, useRouter } from 'vue-router';
+import { setupRouter } from '../utils/routerSetup';
 
 vi.mock('axios')
-vi.mock('@/router', () => ({
-  default: { push: vi.fn() }
+// Mock the api module
+vi.mock('@/utils/api', () => ({
+  default: {
+    post: vi.fn()
+  }
 }))
+
+const mockRouter = {
+  push: vi.fn(),
+  // Add other router methods you might use in your tests
+};
+
+vi.mock('vue-router', () => ({
+  createRouter: vi.fn(() => mockRouter),
+  createWebHistory: vi.fn(),
+  useRouter: vi.fn(() => mockRouter),
+}));
 
 // Create a mock Plan object
 const mockPlan: Plan = {
@@ -46,15 +60,39 @@ const mockCustomer: Customer = {
   stripe_subscription_id: 'sub_123456',
   stripe_customer_id: 'cus_123456',
 }
+
 describe('Auth Store', () => {
+  let router: Router;
+  let pinia: Pinia;
+  let store: ReturnType<typeof useAuthStore>;
+
+
   beforeEach(() => {
-    setActivePinia(createPinia())
-    vi.useFakeTimers()
+    const app = createApp({})
+    pinia = createPinia()
+    pinia.use(logoutPlugin)
+    app.use(pinia)
+    setActivePinia(pinia)
+
+    // Initialize the store after pinia is set up
+    store = useAuthStore();
+
+    vi.useFakeTimers();
+
+    // Setup the router. This mimics what happens in main.ts
+    router = setupRouter();
+    vi.mocked(useRouter).mockReturnValue(router);
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
-    vi.useRealTimers()
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  })
+
+  it('should have $logout method available on the store', () => {
+    const store = useAuthStore()
+    expect(store.$logout).toBeDefined()
+    expect(typeof store.$logout).toBe('function')
   })
 
   it('initializes with correct values', () => {
@@ -62,6 +100,52 @@ describe('Auth Store', () => {
     expect(store.isAuthenticated).toBe(false)
     expect(store.customer).toBeUndefined()
   })
+
+  it('handles auth check error', async () => {
+    const store = useAuthStore();
+    store.setAuthenticated(true); // Make sure we start authenticated
+    const logoutSpy = vi.spyOn(store, '$logout');
+
+    // Mock a generic error (not 401 or 403) with status 500
+    const genericError = new AxiosError('Auth check failed');
+    genericError.response = { status: 500 } as any;
+    vi.mocked(axios.get).mockRejectedValue(genericError);
+
+    // First failure
+    await store.checkAuthStatus();
+    expect(store.isAuthenticated).toBe(false);
+    expect(store.failedAuthChecks).toBe(1);
+
+    // Need to re-authenticate between checks
+    store.setAuthenticated(true);
+
+    // Second failure
+    await store.checkAuthStatus();
+    expect(store.failedAuthChecks).toBe(2);
+    store.setAuthenticated(true);
+
+    // Third failure - should trigger logout
+    await store.checkAuthStatus();
+    expect(store.failedAuthChecks).toBe(0); // We clear all state on logout
+
+    // Now $logout should be called once after three failures
+    expect(logoutSpy).toHaveBeenCalledTimes(1);
+
+    // Reset the mock
+    logoutSpy.mockReset();
+
+    // Now test with a 401 error
+    const unauthorizedError = new AxiosError('Unauthorized');
+    unauthorizedError.response = { status: 401 } as any;
+    vi.mocked(axios.get).mockRejectedValueOnce(unauthorizedError);
+
+    store.setAuthenticated(true);
+    await store.checkAuthStatus();
+
+    // $logout should be called immediately for a 401 error
+    expect(logoutSpy).toHaveBeenCalledTimes(1);
+});
+
 
   it('sets authenticated status', () => {
     const store = useAuthStore()
@@ -77,10 +161,11 @@ describe('Auth Store', () => {
 
   it('checks auth status', async () => {
     const store = useAuthStore()
+    store.setAuthenticated(true);
     vi.mocked(axios.get).mockResolvedValueOnce({
       data: {
-        details: { authorized: true },
-        record: mockCustomer
+        record: mockCustomer,
+        details: { authenticated: true },
       }
     })
 
@@ -89,36 +174,47 @@ describe('Auth Store', () => {
     expect(store.customer).toEqual(mockCustomer)
   })
 
-  it('handles auth check error', async () => {
-    const store = useAuthStore()
-    vi.mocked(axios.get).mockRejectedValueOnce(new Error('Auth check failed'))
-
-    await store.checkAuthStatus()
-    expect(store.isAuthenticated).toBe(false)
-    expect(store.customer).toBeUndefined()
-    // router.push should not be called on the first failure
-    expect(router.push).not.toHaveBeenCalled()
-
-    // Simulate three consecutive failures
-    await store.checkAuthStatus()
-    await store.checkAuthStatus()
-    await store.checkAuthStatus()
-
-    // Now router.push should be called
-    expect(router.push).toHaveBeenCalledWith('/signin')
-  })
-
   it('logs out correctly', () => {
-    const store = useAuthStore()
-    store.setAuthenticated(true)
-    store.setCustomer(mockCustomer)
+    const store = useAuthStore();
 
-    store.logout()
+    // Set up initial authenticated state
+    store.setAuthenticated(true);
+    store.setCustomer(mockCustomer);
 
-    expect(store.isAuthenticated).toBe(false)
-    expect(store.customer).toBeUndefined()
-    expect(router.push).toHaveBeenCalledWith('/signin')
-  })
+    // Verify initial state
+    expect(store.isAuthenticated).toBe(true);
+    expect(store.customer).toEqual(mockCustomer);
+
+    // Call the logout method
+    store.logout();
+
+    // Verify that the auth state is reset
+    expect(store.customer).toBeUndefined();
+    expect(store.isAuthenticated).toBe(false);
+
+    // Verify that the auth check interval is stopped
+    expect(store.authCheckInterval).toBeNull();
+  });
+
+  it('clears session storage key after logout', () => {
+    const authStore = useAuthStore();
+    // Define a storage key for testing purposes
+    const storageKey = 'test-auth-storage-key';
+
+    // Verify that the session key is not already populated
+    expect(sessionStorage.getItem(storageKey)).toBeNull();
+
+    sessionStorage.setItem(storageKey, '!');
+
+    // Verify that the session key has the value we set
+    expect(sessionStorage.getItem(storageKey)).toBe('!');
+
+    // Simulate a logout
+    authStore.logout();
+
+    // Verify that the session storage key is cleared after logout
+    expect(sessionStorage.getItem(storageKey)).toBeNull();
+  });
 
   it('starts auth check interval', () => {
     const store = useAuthStore()

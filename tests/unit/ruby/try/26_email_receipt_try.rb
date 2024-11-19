@@ -14,7 +14,7 @@
 require 'onetime'
 
 # Load the app
-OT::Config.path = File.join(__dir__, '..', 'config.test.yaml')
+OT::Config.path = File.join(Onetime::HOME, 'tests', 'unit', 'ruby', 'config.test.yaml')
 OT.boot! :test
 
 # Setup some variables for these tryouts
@@ -29,9 +29,9 @@ OT.boot! :test
 @secretid = "secret#{@now}"
 @email_receipt = OT::EmailReceipt.new(secretid: @secretid, custid: @email_address)
 
-## EmailReceipt has the correct prefix (method missing in Familia v1.0.0-rc7)
+## EmailReceipt has the correct prefix (method is in Familia v1.1.0-rc1+)
 @email_receipt.prefix
-##=> :secret
+#=> :secret
 
 ## EmailReceipt has the correct suffix
 @email_receipt.suffix

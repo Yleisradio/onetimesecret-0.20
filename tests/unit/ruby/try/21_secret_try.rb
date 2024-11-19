@@ -20,12 +20,12 @@ require 'onetime'
 
 # Use the default config file for tests
 @iterations = 1000
-OT::Config.path = File.join(__dir__, '..', 'config.test.yaml')
+OT::Config.path = File.join(Onetime::HOME, 'tests', 'unit', 'ruby', 'config.test.yaml')
 OT.boot! :test
 
 ## Can create Secret
 s = Onetime::Secret.new :private
-[s.class, s.db, s.metadata_key]
+[s.class, s.redis.connection[:db], s.metadata_key]
 #=> [Onetime::Secret, 8, nil]
 
 ## Keys are always unique for Secrets

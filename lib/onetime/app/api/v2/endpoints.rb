@@ -38,6 +38,15 @@ module Onetime::App
         OT::Logic::Misc::ReceiveFeedback,
         "Feedback received. Send as much as you like.",
         "Sorry we were not able to receive your feedback (it's us, not you).",
+        allow_anonymous: true,
+      )
+    end
+
+    def receive_exception
+      process_action(
+        OT::Logic::Misc::ReceiveException,
+        "Exception received. No offense taken.",
+        "Sorry we were not able to receive your exception (it's us, not you).",
         allow_anonymous: true
       )
     end
@@ -57,7 +66,7 @@ module Onetime::App
           # the Official Shrimp HTTP Header. The endoint it supports
           # is used by the Vue app as a Just-In-Time check to try to
           # avoid scenarios where we have an outdated shrimp and an
-          # importand request fails inexplicably for the user.
+          # important request fails inexplicably for the user.
           shrimp = req.env['HTTP_O_SHRIMP'].to_s
           OT.le 'Missing O-Shrimp header' if shrimp.empty?
 

@@ -52,7 +52,7 @@ module Onetime::Logic
             end
           else
 
-            owner.increment_field :secrets_shared unless cust.anonymous?
+            owner.increment_field :secrets_shared unless owner.anonymous?
             OT::Customer.global.increment_field :secrets_shared
 
             secret.received!

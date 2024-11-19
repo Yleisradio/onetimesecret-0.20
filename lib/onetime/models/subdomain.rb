@@ -13,8 +13,6 @@ class Onetime::Subdomain < Familia::Horreum
 
   feature :safe_dump
 
-  db 6
-
   prefix :customer
   identifier :custid
   suffix :subdomain
@@ -40,8 +38,9 @@ class Onetime::Subdomain < Familia::Horreum
   end
 
   def destroy! *args
-    OT::Subdomain.rem @cname
-    super
+    ret = super
+    OT::Subdomain.values.remove identifier
+    ret
   end
 
   def fulldomain
@@ -65,7 +64,7 @@ class Onetime::Subdomain < Familia::Horreum
     end
 
     def rem cname
-      self.values.del(cname)
+      self.values.remove(cname)
     end
 
     def all
@@ -111,7 +110,7 @@ class Onetime::Subdomain < Familia::Horreum
     #
     # This method combines the mapping lookup with loading the customer record,
     # providing a convenient way to retrieve a customer by their custom domain.
-    def load_by_cname(cname)
+    def find_by_cname(cname)
       load map(cname)
     end
 

@@ -1,133 +1,163 @@
 <template>
+  <!-- Using v-if instead of v-show for modal dialogs is preferred for accessibility:
+       - Completely removes content from DOM and accessibility tree when closed
+       - Ensures cleaner navigation for screen reader users
+       - Prevents focus trapping issues since hidden content cannot receive focus
+       - Follows ARIA best practices for modal dialogs
+       Performance impact of DOM removal/recreation is negligible for modals -->
   <div v-if="isOpen"
-       class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm"
+       @keydown="handleKeydown"
+       @click.self="closeModal"
+       class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm motion-safe:transition-all motion-safe:duration-300"
+       :class="{ 'opacity-0': !isOpen }"
        aria-labelledby="settings-modal"
+       aria-describedby="settings-modal-description"
        role="dialog"
        aria-modal="true">
-    <div ref="modalContentRef"
-         class="relative mx-auto w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800 transition-all duration-300 ease-out transform">
-      <div class="flex h-[90vh] sm:h-[80vh] flex-col">
-        <!-- Modal Header -->
-        <div class="flex-shrink-0 flex items-center justify-between border-b p-4 border-gray-200 dark:border-gray-700">
-          <h2 id="settings-modal" class="text-2xl font-bold text-gray-900 dark:text-white">
-            Settings
-          </h2>
-          <button @click="closeModal"
-                  class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 transition-colors duration-200"
-                  aria-label="Close settings">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
 
-        <!-- Tabs -->
-        <div class="flex-shrink-0 flex overflow-x-auto border-b border-gray-200 dark:border-gray-700">
-          <button v-for="tab in tabs"
-                  :key="tab"
-                  @click="activeTab = tab"
-                  class="px-4 py-2 text-sm sm:text-base font-medium transition-colors duration-200 whitespace-nowrap"
-                  :class="[activeTab === tab ? 'border-b-2 border-brand-600 text-brand-600' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']">
-            {{ tab }}
-          </button>
-        </div>
+    <!-- Description for screen readers -->
+    <div id="settings-modal-description"
+         class="sr-only">
+         Customize your app preferences and settings
+    </div>
 
-        <!-- Content -->
-        <div class="flex-grow overflow-y-auto p-4 sm:p-6">
-          <!-- General Tab -->
-          <div v-if="activeTab === 'General'" class="space-y-8">
-            <section>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Appearance</h3>
-              <div class="flex items-center justify-between">
-                <span class="text-gray-700 dark:text-gray-300">Theme</span>
-                <ThemeToggle />
-              </div>
-            </section>
+    <FocusTrap :active="isOpen"
+               :initial-focus="() => $refs.closeButton">
 
-            <section>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Language</h3>
-              <LanguageToggle @menuToggled="handleMenuToggled" />
-            </section>
+      <div class="relative mx-auto w-full max-w-lg sm:max-w-md md:max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800 motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out transform"
+           :class="{ 'opacity-0 scale-95': !isOpen, 'opacity-100 scale-100': isOpen }">
 
-            <section>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Jurisdiction ({{ cust?.custid }})</h3>
-              <div class="rounded-lg bg-gray-100 p-4 dark:bg-gray-700 prose dark:prose-invert">
-                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-300">
-                  Your data for this account is located in the
-                  <span class="font-semibold">{{ currentJurisdiction.display_name }}</span>.<br>
-                  This is determined by the domain you're accessing:
-                  <span class="underline">{{ currentJurisdiction.domain }}.</span>
-                </p>
-              </div>
-              <MoreInfoText textColor="text-brandcomp-800 dark:text-gray-100"
-                            bgColor="bg-white dark:bg-gray-800">
-                <div class="px-4 py-4 sm:px-6 sm:py-6">
-                  <div class="max-w-xl text-sm sm:text-base text-gray-600 dark:text-gray-300 prose dark:prose-invert">
-                    <p>
-                      Accounts in each location are completely separate with no data shared between them.
-                      You can create an account with the same email address in more than one location.
-                    </p>
-                    <p>
-                      To learn more, please <a :href="`${supportHost}/docs`" class="text-brand-600 hover:underline">visit our documentation</a> or
-                      <RouterLink to="/feedback" class="text-brand-600 hover:underline">contact us</RouterLink>.
-                    </p>
+        <div class="flex h-[90vh] sm:h-[80vh] flex-col">
+          <!-- Modal Header -->
+          <div class="flex-shrink-0 flex items-center justify-between bg-gray-50 p-4 dark:bg-gray-700">
+            <h2 id="settings-modal"
+                class="text-2xl font-bold text-gray-900 dark:text-white">
+              Settings
+            </h2>
+            <div class="flex-shrink-0 flex overflow-x-auto px-6 py-2 gap-2"
+                 role="tablist"
+                 @keydown="handleTabKeydown"
+                 aria-label="Settings sections">
+              <button ref="closeButton"
+                      @click="closeModal"
+                      class="rounded-md p-2 text-gray-500 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+                      aria-label="Close settings">
+                <svg class="h-5 w-5"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     aria-hidden="true">
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="flex-shrink-0 flex overflow-x-auto px-6 py-2 gap-2"
+               role="tablist"
+               aria-label="Settings sections">
+            <button v-for="tab in tabs"
+                    :key="tab.id"
+                    @click="activeTab = tab.id"
+                    :aria-selected="activeTab === tab.id"
+                    :aria-controls="`tab-${tab.id}`"
+                    role="tab"
+                    :id="`tab-button-${tab.id}`"
+                    :tabindex="activeTab === tab.id ? 0 : -1"
+                    class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandcomp-500 focus:ring-offset-2 transition-colors duration-200"
+                    :class="{
+                      'bg-brandcomp-100 dark:bg-brandcomp-700': activeTab === tab.id,
+                      'hover:bg-gray-200 dark:hover:bg-gray-600': activeTab !== tab.id
+                    }">
+              {{ tab.label }}
+            </button>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-grow overflow-y-auto p-4 sm:p-6">
+            <Suspense>
+              <template #default>
+                <!-- General Tab -->
+                <div v-if="activeTab === 'general'"
+                     id="tab-general"
+                     role="tabpanel"
+                     :aria-labelledby="'tab-button-general'"
+                     tabindex="0"
+                     class="space-y-8">
+                  <GeneralTab @close="closeModal" />
+                </div>
+
+                <!-- Data Region Tab -->
+                <div v-else-if="activeTab === 'data-region'"
+                     id="tab-data-region"
+                     role="tabpanel"
+                     :aria-labelledby="'tab-button-data-region'"
+                     tabindex="0"
+                     class="space-y-8">
+                  <JurisdictionTab v-if="regionsEnabled" />
+                </div>
+              </template>
+
+              <template #fallback>
+                <div class="flex items-center justify-center h-full">
+                  <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-600"
+                       role="status">
+                    <span class="sr-only">Loading settings content...</span>
                   </div>
                 </div>
-              </MoreInfoText>
-              <div class="mt-6">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Available Jurisdictions:</h4>
-                <ul class="space-y-2">
-                  <li v-for="jurisdiction in jurisdictions"
-                      :key="jurisdiction.identifier"
-                      class="flex items-center space-x-2 text-sm">
-                    <Icon :icon="jurisdiction.icon" class="h-5 w-5" aria-hidden="true" />
-                    <a :href="`https://${jurisdiction.domain}/signup`"
-                       :class="{ 'font-semibold': currentJurisdiction.identifier === jurisdiction.identifier }"
-                       class="text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400">
-                      {{ jurisdiction.display_name }}
-                    </a>
-                    <span v-if="currentJurisdiction.identifier === jurisdiction.identifier"
-                          class="text-xs text-gray-500 dark:text-gray-400">(Current)</span>
-                  </li>
-                </ul>
-              </div>
-            </section>
+              </template>
+            </Suspense>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="flex-shrink-0 flex justify-end bg-gray-50 p-4 dark:bg-gray-700">
+            <button @click="closeModal"
+                    class="rounded-md bg-brand-600 px-4 py-2 text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-colors duration-200">
+              Done
+            </button>
           </div>
         </div>
-
-        <!-- Footer -->
-        <div class="flex-shrink-0 flex justify-end bg-gray-50 p-4 dark:bg-gray-700">
-          <button @click="closeModal"
-                  class="rounded-md bg-brand-600 px-4 py-2 text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-colors duration-200">
-            Done
-          </button>
-        </div>
       </div>
-    </div>
+    </FocusTrap>
   </div>
 </template>
 
+<style scoped>
+/* Add focus styles that work in all color schemes */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-gray-800;
+}
 
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+</style>
 
 <script setup lang="ts">
-import LanguageToggle from '@/components/LanguageToggle.vue';
-import ThemeToggle from '@/components/ThemeToggle.vue';
-import { useClickOutside } from '@/composables/useClickOutside';
-import { useWindowProp } from '@/composables/useWindowProps';
-import { useJurisdictionStore } from '@/stores/jurisdictionStore';
-import { Icon } from '@iconify/vue';
-import { computed, ref } from 'vue';
-import MoreInfoText from '@/components/MoreInfoText.vue';
+import { useWindowProps } from '@/composables/useWindowProps';
+import { FocusTrap } from 'focus-trap-vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import GeneralTab from './settings/GeneralTab.vue';
+import JurisdictionTab from './settings/JurisdictionTab.vue';
 
-const cust = useWindowProp('cust');
-const supportHost = useWindowProp('support_host');
+const { regions_enabled: regionsEnabled } = useWindowProps(['regions_enabled']);
 
-const jurisdictionStore = useJurisdictionStore();
-const currentJurisdiction = computed(() => jurisdictionStore.getCurrentJurisdiction);
-const jurisdictions = computed(() => jurisdictionStore.getAllJurisdictions);
+interface Tab {
+  id: string;
+  label: string;
+}
 
-
-defineProps<{
+const props = defineProps<{
   isOpen: boolean;
 }>();
 
@@ -135,17 +165,75 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const modalContentRef = ref<HTMLElement | null>(null);
-const tabs = ['General']; // , 'Notifications', 'Security'
-const activeTab = ref('General');
+const closeButton = ref<HTMLButtonElement | null>(null);
+let previouslyFocusedElement: HTMLElement | null = null;
+
+
+const tabs = ref<Tab[]>([
+  { id: 'general', label: 'General' },
+]);
+
+if (regionsEnabled.value) {
+  tabs.value.push({ id: 'data-region', label: 'Data Region' });
+}
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+};
+const activeTab = ref<Tab['id']>(tabs.value[0].id);
 
 const closeModal = () => {
   emit('close');
+  // Return focus to the previous element when modal closes
+  nextTick(() => {
+    previouslyFocusedElement?.focus();
+  });
 };
 
-const handleMenuToggled = () => {
-  // Handle language menu toggle
-};
+// Reset tab when modal closes and re-opens
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    activeTab.value = tabs.value[0].id;
+    // Store the currently focused element when modal opens
+    previouslyFocusedElement = document.activeElement as HTMLElement;
+  }
+});
 
-useClickOutside(modalContentRef, closeModal);
+// Clean up when component is destroyed
+onBeforeUnmount(() => {
+  previouslyFocusedElement = null;
+});
+
+onMounted(() => {
+  if (!closeButton.value) {
+    console.warn('Initial focus element not found for settings modal');
+  }
+});
+
+const handleTabKeydown = (e: KeyboardEvent) => {
+  const tabButtons = tabs.value.map(tab => tab.id);
+  const currentIndex = tabButtons.indexOf(activeTab.value);
+
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      e.preventDefault();
+      activeTab.value = tabButtons[(currentIndex + 1) % tabButtons.length];
+      break;
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      e.preventDefault();
+      activeTab.value = tabButtons[(currentIndex - 1 + tabButtons.length) % tabButtons.length];
+      break;
+    case 'Home':
+      e.preventDefault();
+      activeTab.value = tabButtons[0];
+      break;
+    case 'End':
+      e.preventDefault();
+      activeTab.value = tabButtons[tabButtons.length - 1];
+      break;
+  }
+};
 </script>

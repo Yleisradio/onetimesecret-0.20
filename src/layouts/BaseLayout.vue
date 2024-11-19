@@ -6,7 +6,7 @@
     <div class="w-full h-1 bg-brand-500 fixed top-0 left-0 z-50"></div>
 
     <!-- Good morning Vietnam -->
-    <GlobalBroadcast :show="false" content="" />
+    <GlobalBroadcast :show="hasGlobalBanner" :content="globalBanner" />
 
     <!-- Header content, Ramos territory -->
     <slot name="header"></slot>
@@ -17,6 +17,9 @@
     <!-- Footer content, Haaland maybe? -->
     <slot name="footer"></slot>
 
+    <slot name="status">
+      <div id="status-messages"></div>
+    </slot>
   </div>
 </template>
 
@@ -32,12 +35,16 @@ export interface Props {
   onetimeVersion: string
   plansEnabled?: boolean
   supportHost?: string
+  hasGlobalBanner: boolean
+  globalBanner?: string
 }
 
 withDefaults(defineProps<Props>(), {
   authenticated: false,
   colonel: false,
   plansEnabled: false,
+  hasGlobalBanner: false,
+  globalBanner: '',
 })
 
 </script>

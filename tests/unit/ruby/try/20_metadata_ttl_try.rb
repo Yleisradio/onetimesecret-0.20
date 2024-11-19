@@ -17,11 +17,12 @@
 require 'onetime'
 
 # Use the default config file for tests
-OT::Config.path = File.join(__dir__, '..', 'config.test.yaml')
+OT::Config.path = File.join(Onetime::HOME, 'tests', 'unit', 'ruby', 'config.test.yaml')
 OT.boot! :test
 
 # Setup
-@metadata, @secret = Onetime::Secret.spawn_pair 'anon', :tryouts
+@metadata, @secret = Onetime::Secret.spawn_pair 'anon'
+# metadata, secret = Onetime::Secret.spawn_pair 'anon'
 @metadata.save
 @secret.save
 

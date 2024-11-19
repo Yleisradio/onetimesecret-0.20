@@ -1,8 +1,9 @@
 <template>
   <div ref="dropdownRef"
        class="relative inline-flex items-center space-x-2 px-3 py-1 rounded-full
-           bg-gray-100 text-base font-medium text-gray-700 shadow-sm
-           dark:bg-gray-800 dark:text-gray-300
+           bg-gray-100 text-base font-medium shadow-sm
+           text-gray-500 dark:text-gray-400
+           dark:bg-gray-800
            transition-all duration-100 ease-in-out hover:shadow-md">
     <span class="sr-only">Current jurisdiction:</span>
     <button @click="toggleDropdown"
@@ -14,6 +15,8 @@
       <Icon :icon="currentJurisdiction.icon"
             class="h-5 w-5"
             aria-hidden="true" />
+
+      <!-- Current Jurisdiction -->
       <span>{{ currentJurisdiction.display_name }}</span>
 
       <svg xmlns="http://www.w3.org/2000/svg"
@@ -42,17 +45,19 @@
           aria-labelledby="listbox-label"
           aria-activedescendant="listbox-option-0">
 
-        <!-- Add the title header here -->
+        <!-- List Title -->
         <li
-            class="px-3 py-2 text-xs font-semibold font-brand text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            class="px-3 py-2 text-xs font-semibold font-brand text-gray-700 dark:text-gray-100 uppercase tracking-wider">
           Regions
         </li>
 
+        <!-- List Options -->
         <li v-for="jurisdiction in jurisdictions"
             :key="jurisdiction.identifier"
             class="relative py-2 pl-3 pr-9 cursor-default select-none font-brand text-base
-                 hover:bg-brand-100 dark:hover:bg-brand-600 transition-colors duration-200"
-            :class="{ 'bg-brand-50 dark:bg-brand-500': currentJurisdiction.identifier === jurisdiction.identifier }"
+                  text-gray-700 dark:text-gray-50
+                 hover:bg-brand-100 dark:hover:bg-brandcompdim-800 transition-colors duration-200"
+            :class="{ 'bg-brand-50 dark:bg-brandcompdim-900': currentJurisdiction.identifier === jurisdiction.identifier }"
             role="option"
             :aria-selected="currentJurisdiction.identifier === jurisdiction.identifier">
           <a :href="`https://${jurisdiction.domain}/signup`"
@@ -62,6 +67,8 @@
               <Icon :icon="jurisdiction.icon"
                     class="mr-2 h-5 w-5"
                     aria-hidden="true" />
+
+              <!-- Jurisdiction Name -->
               <span class="block truncate"
                     :class="{ 'font-semibold': currentJurisdiction.identifier === jurisdiction.identifier }">
                 {{ jurisdiction.display_name }}
@@ -69,7 +76,7 @@
             </span>
             <span v-if="currentJurisdiction.identifier === jurisdiction.identifier"
                   class="absolute inset-y-0 right-0 flex items-center pr-4 text-brand-600
-                   dark:text-brand-300">
+                   dark:text-brand-400">
               <svg class="h-5 w-5"
                    xmlns="http://www.w3.org/2000/svg"
                    viewBox="0 0 20 20"
