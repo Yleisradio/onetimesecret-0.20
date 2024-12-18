@@ -780,27 +780,31 @@
 										{
 											"description": "(Required) ",
 											"key": "secret",
-											"value": "<string>"
+											"value": "secretnov6"
 										},
 										{
 											"key": "ttl",
-											"value": "<string>"
+											"value": "<string>",
+											"disabled": true
 										},
 										{
 											"key": "passphrase",
-											"value": "<string>"
+											"value": "<string>",
+											"disabled": true
 										},
 										{
 											"key": "recipient",
-											"value": "<string>"
+											"value": "<string>",
+											"disabled": true
 										},
 										{
 											"key": "kind",
-											"value": "<string>"
+											"value": "share"
 										},
 										{
 											"key": "share_domain",
-											"value": "<string>"
+											"value": "<string>",
+											"disabled": true
 										}
 									]
 								},
@@ -987,7 +991,7 @@
 									"variable": [
 										{
 											"key": "secret_key",
-											"value": "28zi06bh9ilgyw4ncu49q9a8s0166hu",
+											"value": "3xt2nrqiydl8eooxwrdcemp7t61epoj",
 											"description": "(Required) "
 										}
 									]
