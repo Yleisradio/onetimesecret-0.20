@@ -11,7 +11,11 @@
 #   2. Validate your configuration against this schema using Yamale:
 #      yamale -s etc/config.schema.yaml etc/config.yaml
 #
-
+# Use `any()` with multiple type validators to allow boolean, integer, or
+# null/none values. This allows multiple possible types, including the ability
+# to specify `none()` for null values. For example, `:default_ttl` and
+# `:ttl_options` can now be a boolean, an integer (for `:default_ttl`),
+# a list of strings (for `:ttl_options`), or null.
 :site: include(':site')
 :redis: include(':redis')
 :colonels: list(str(), required=True)
@@ -22,6 +26,7 @@
 :services: include(':services')
 :limits: include(':limits')
 :development: include(':development')
+:experimental: include(':experimental')
 
 ---
 :site:
@@ -58,20 +63,19 @@
   :secret_key: str()
 
 :secret_options:
-  :default_ttl: str()
-  :ttl_options: any(str(), list(str()))
+  :default_ttl: any(bool(), int(), str(), null())
+  :ttl_options: any(bool(), list(str()), str(), null())
 
 :plans:
   :enabled: any()
   :stripe_key: str(required=False)
   :webook_signing_secret: str(required=False)
-  :payment_links: any(required=False)
 
 :support:
   :host: str(required=False)
 
 :regions:
-  :enabled: bool()
+  :enabled: str()
   :current_jurisdiction: str(required=False)
   :jurisdictions: list(include(':jurisdiction'), required=False)
 
@@ -79,7 +83,11 @@
   :identifier: str()
   :display_name: str()
   :domain: str()
-  :icon: str()
+  :icon: include(':icon')
+
+:icon:
+  :collection: str()
+  :name: str()
 
 :incoming:
   :enabled: bool()
@@ -88,6 +96,8 @@
 
 :redis:
   :uri: str()
+  :dbs: include(':dbs')
+  :config: str(required=False)
 
 :emailer:
   :mode: str()
@@ -99,6 +109,19 @@
   :pass: str()
   :auth: str()
   :tls: any()
+
+:dbs:
+  :session: str(required=False)
+  :splittest: str(required=False)
+  :custom_domain: str(required=False)
+  :customer: str(required=False)
+  :subdomain: str(required=False)
+  :metadata: str(required=False)
+  :email_receipt: str(required=False)
+  :secret: str(required=False)
+  :rate_limit: str(required=False)
+  :feedback: str(required=False)
+  :exception_info: str(required=False)
 
 :mail:
   :truemail:
@@ -125,7 +148,6 @@
     :logger:
       :tracking_event: str()
       :stdout: bool()
-      :log_absolute_path: str(required=False)
 
 :services:
   :sentry:
@@ -133,8 +155,8 @@
     :enabled: any()
 
 :limits:
+  :check_status: int()
   :create_secret: int()
-  :create_account: int()
   :update_account: int()
   :email_recipient: int()
   :send_feedback: int()
@@ -148,12 +170,17 @@
   :destroy_account: int()
   :forgot_password_request: int()
   :forgot_password_reset: int()
-  :generate_apitoken: int()
+  :generate_apikey: int()
+  :update_branding: int()
   :add_domain: int()
   :remove_domain: int()
   :list_domains: int()
   :get_domain: int()
   :verify_domain: int()
+  :report_exception: int()
+  :generate_apitoken: int()
+  :create_account: int()
+  :attempt_secret_access: int()
 
 :development:
   :enabled: any()
@@ -161,6 +188,8 @@
   :frontend_host: str()
 
 :experimental:
-  freeze_app: bool()
-  csp:
+  :freeze_app: bool()
+  :csp:
+    :enabled: str()
+  :markdown:
     :enabled: str()

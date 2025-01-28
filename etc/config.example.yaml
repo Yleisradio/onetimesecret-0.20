@@ -260,6 +260,10 @@
   :verify_domain: 25
   :report_exception: 50
   :attempt_secret_access: 10
+  :check_status: 1000
+  :generate_apikey: 50
+  :update_branding: 50
+
 :development:
   # Development Mode Configuration
   #
@@ -322,3 +326,7 @@
   # When disabled, no csp headers are included in any environment.
   :csp:
     :enabled: <%= ENV['CSP_ENABLED'] == 'true' %>
+  # When enabled, secrets are passed through a client-side markdown renderer
+  # before being displayed.
+  :markdown:
+    :enabled: <%= ENV['MARKDOWN_ENABLED'] == 'true' %>
