@@ -138,3 +138,14 @@ repos:
         language: system
         always_run: true
         pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: yamale-config-validation
+        stages: [pre-commit]
+        name: Validate Onetime Config Schema
+        description: Validate configuration against schema using Yamale
+        entry: bash -c 'yamale -s etc/config.schema.yaml etc/config.example.yaml'
+        language: python
+        files: ^etc/(config\.schema\.yaml|config\.example\.yaml)$
+        additional_dependencies: [yamale]
