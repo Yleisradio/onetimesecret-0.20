@@ -71,14 +71,6 @@
   :enabled: any()
   :stripe_key: str(required=False)
   :webook_signing_secret: str(required=False)
-  :payment_links: include(':payment_links', required=False)
-
-:payment_links:
-  :identity:
-    :tierid: str()
-    :month: str()
-    :year: str()
-  :dedication: any()
 
 :support:
   :host: str(required=False)
@@ -121,17 +113,17 @@
   :tls: any()
 
 :dbs:
-  :session: any(str(), int(), null())
-  :splittest: any(str(), int(), null())
-  :custom_domain: any(str(), int(), null())
-  :customer: any(str(), int(), null())
-  :subdomain: any(str(), int(), null())
-  :metadata: any(str(), int(), null())
-  :email_receipt: any(str(), int(), null())
-  :secret: any(str(), int(), null())
-  :rate_limit: any(str(), int(), null())
-  :feedback: any(str(), int(), null())
-  :exception_info: any(str(), int(), null())
+  :session: str(required=False)
+  :splittest: str(required=False)
+  :custom_domain: str(required=False)
+  :customer: str(required=False)
+  :subdomain: str(required=False)
+  :metadata: str(required=False)
+  :email_receipt: str(required=False)
+  :secret: str(required=False)
+  :rate_limit: str(required=False)
+  :feedback: str(required=False)
+  :exception_info: str(required=False)
 
 :mail:
   :truemail:
@@ -157,9 +149,8 @@
     :smtp_error_body_pattern: str(required=False)
     # TODO: Double check whether the prefix'd colons have been removed before merging with develop
     :logger:
-      :tracking_event: str(required=False)
-      :stdout: bool(required=False)
-      :log_absolute_path: str(required=False)
+      :tracking_event: str()
+      :stdout: bool()
 
 :internationalization:
   :enabled: any(bool(), str())
@@ -206,6 +197,7 @@
   :destroy_account: int()
   :forgot_password_request: int()
   :forgot_password_reset: int()
+  :generate_apikey: int()
   :update_branding: int()
   :add_domain: int()
   :remove_domain: int()
@@ -217,16 +209,14 @@
   :create_account: int()
   :attempt_secret_access: int()
 
-:stathat: any()
-
 :development:
   :enabled: any()
   :debug: any()
   :frontend_host: str()
 
 :experimental:
-  :freeze_app: any(str(), bool())
+  :freeze_app: bool()
   :csp:
-    :enabled: any(str(), bool())
+    :enabled: str()
   :markdown:
-    :enabled: any(str(), bool())
+    :enabled: str()

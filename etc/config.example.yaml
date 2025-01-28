@@ -299,6 +299,7 @@
   :report_exception: 50
   :attempt_secret_access: 10
   :check_status: 1000
+  :generate_apikey: 50
   :update_branding: 50
 
 :development:
