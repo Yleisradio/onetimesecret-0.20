@@ -23,6 +23,7 @@
   import { useDropdown } from '@/composables/useDropdown';
   import { onClickOutside, onKeyStroke } from '@vueuse/core';
   import { watch, ref } from 'vue';
+  import { WindowService } from '@/services/window.service';
 
   const props = withDefaults(
     defineProps<{
@@ -45,6 +46,7 @@
 
   const activeIndex = ref(-1);
   const buttonRef = ref<HTMLButtonElement | null>(null);
+  const authenticated = WindowService.get('authenticated') ?? false;
 
   const selectDomain = (domain: string) => {
     updateSelectedDomain(domain);
@@ -189,6 +191,23 @@
                   class="h-4 w-4 shrink-0"
                 />
                 <span :class="{'pl-6': !(domain === selectedDomain)}">{{ domain }}</span>
+            </div>
+            <div
+              v-if="!authenticated"
+              class="p-2 hover:text-brandcomp-600 dark:hover:text-brandcomp-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
+              role="option"
+              :class="[
+                  'p-2 flex items-center gap-2 transition-colors',
+                  'cursor-pointer select-none',
+                  'hover:bg-gray-50 dark:hover:bg-gray-700',
+                ]">
+                <OIcon
+                  v-if="false"
+                  collection="heroicons"
+                  name="check"
+                  class="h-4 w-4 shrink-0"
+                />
+                <router-link to="/pricing">Upgrade for secrets.yourdomain.com</router-link>
             </div>
           </div>
         </div>
