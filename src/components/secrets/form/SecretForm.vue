@@ -88,18 +88,11 @@ onMounted(() => {
           SecretContentInputArea handles the dropdown UI. The selected domain
           persists across sessions and can be overridden when needed.
       -->
+
       <SecretContentInputArea :content="form.secret"
-                              :share-domain="form.share_domain"
-                              :available-domains="availableDomains"
-                              :initial-domain="selectedDomain"
-                              :with-domain-dropdown="domainsEnabled"
                               :disabled="isSubmitting"
-                              @update:selected-domain="updateSelectedDomain"
                               @update:content="(content) => operations.updateField('secret', content)" />
 
-      <CustomDomainPreview v-if="productIdentity.isCanonical"
-                           :default_domain="selectedDomain"
-                           data-testid="custom-domain-preview" />
 
       <SecretFormPrivacyOptions :form="form"
                                 :with-recipient="props.withRecipient"
@@ -108,6 +101,12 @@ onMounted(() => {
                                 :validation="validation"
                                 :operations="operations"
                                 :disabled="isSubmitting" />
+
+      <CustomDomainPreview v-if="productIdentity.isCanonical"
+                                        :available-domains="availableDomains"
+                                        :with-domain-dropdown="domainsEnabled"
+                                        data-testid="custom-domain-preview"
+                                        @update:selected-domain="updateSelectedDomain" />
 
       <div class="mb-4 flex w-full space-x-2">
         <Suspense v-if="props.withGenerate">
