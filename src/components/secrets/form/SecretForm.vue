@@ -9,6 +9,9 @@
   import { useDomainDropdown } from '@/composables/useDomainDropdown';
   import { useProductIdentity } from '@/stores/identityStore';
   import CustomDomainPreview from './../../CustomDomainPreview.vue';
+  import SecretLinksTable from '../SecretLinksTable.vue';
+  import HomepageLinksPlaceholder from '../HomepageLinksPlaceholder.vue';
+  import { nanoid } from 'nanoid';
 
   export interface Props {
     enabled?: boolean;
@@ -31,11 +34,22 @@
   const showFinalNotice = ref(false);
   const showProTip = ref(props.withAsterisk);
 
+  const createdSecrets = ref<Array<{
+    id: string;
+    url: string;
+    hasPassphrase: boolean;
+    ttl: number;
+    createdAt: Date;
+  }>>([]);
+
   const { form, validation, operations, isSubmitting, submit } = useSecretConcealer({
     onSuccess: async (response) => {
-      await router.push({
-        name: 'Metadata link',
-        params: { metadataKey: response.record.metadata.key },
+      createdSecrets.value.unshift({
+        id: nanoid(),
+        url: window.location.origin + '/secret/' + response.record.metadata.key,
+        hasPassphrase: !!form.passphrase,
+        ttl: form.ttl,
+        createdAt: new Date(),
       });
       operations.reset();
     },
@@ -229,5 +243,14 @@
         </div>
       </div>
     </form>
+
+    <template v-if="createdSecrets.length > 0">
+      <SecretLinksTable :secrets="createdSecrets" />
+    </template>
+    <template v-else>
+      <HomepageLinksPlaceholder
+        title="No secrets yet"
+        description="Create a secret above to get started." />
+    </template>
   </div>
 </template>

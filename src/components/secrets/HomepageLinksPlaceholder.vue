@@ -1,4 +1,4 @@
-<!-- EmptyState.vue -->
+<!-- src/components/secrets/HomepageLinksPlaceholder.vue -->
 <script setup lang="ts">
   import { ref } from 'vue';
 

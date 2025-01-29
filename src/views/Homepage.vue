@@ -32,11 +32,6 @@
       :with-asterisk="true"
       :with-generate="true" />
 
-      <HomepageLinksPlaceholder
-        class="mb-16"
-        title="No secrets yet"
-        description="Create a secret above to get started."
-      />
 
   </div>
 </template>
