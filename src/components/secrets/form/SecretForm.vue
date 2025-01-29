@@ -52,6 +52,8 @@
         createdAt: new Date(),
       });
       operations.reset();
+      secretContentInput.value?.clearTextarea(); // Clear textarea
+
     },
   });
 
@@ -77,6 +79,7 @@
 
   // Form submission handlers
   const handleConceal = () => submit('conceal');
+  const secretContentInput = ref<{ clearTextarea: () => void } | null>(null);
   const togglePassphraseVisibility = () => {
     passphraseVisible.value = !passphraseVisible.value;
   };
@@ -117,6 +120,7 @@
         <div class="p-6 space-y-6">
           <!-- Secret Input Section -->
           <SecretContentInputArea
+            ref="secretContentInput"
             v-model:content="form.secret"
             :disabled="isSubmitting"
             @update:content="(content) => operations.updateField('secret', content)"

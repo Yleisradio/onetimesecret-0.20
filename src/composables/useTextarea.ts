@@ -23,6 +23,15 @@ export function useTextarea(options: TextareaOptions) {
       textareaRef.value.style.height = `${newHeight}px`;
     }
   };
+  const clearTextarea = () => {
+    content.value = '';
+    charCount.value = 0;
+    if (textareaRef.value) {
+      textareaRef.value.style.height = 'auto';
+    }
+    adjustHeight();
+    options.onContentChange?.('');
+  };
 
   const checkContentLength = (event: Event) => {
     const target = event.target as HTMLTextAreaElement;
@@ -70,6 +79,7 @@ export function useTextarea(options: TextareaOptions) {
 
   return {
     content,
+    clearTextarea,
     charCount,
     textareaRef,
     checkContentLength,

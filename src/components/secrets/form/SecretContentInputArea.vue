@@ -19,7 +19,7 @@
 
   const emit = defineEmits(['update:content']);
 
-  const { content, charCount, textareaRef, checkContentLength } = useTextarea({
+  const { content, charCount, textareaRef, checkContentLength, clearTextarea } = useTextarea({
     maxLength: props.maxLength || 10000,
     initialContent: props.initialContent,
     maxHeight: 400,
@@ -46,6 +46,8 @@
   watch(content, (newContent) => {
     emit('update:content', newContent);
   });
+
+  defineExpose({ clearTextarea });
 </script>
 
 <template>
