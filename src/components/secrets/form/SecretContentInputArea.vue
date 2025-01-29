@@ -1,55 +1,51 @@
 <!-- src/components/secrets/form/SecretContentInputArea.vue -->
 <script setup lang="ts">
-import OIcon from '@/components/icons/OIcon.vue';
-import { useCharCounter } from '@/composables/useCharCounter';
-import { useTextarea } from '@/composables/useTextarea';
-import { computed, watch } from 'vue';
+  import OIcon from '@/components/icons/OIcon.vue';
+  import { useCharCounter } from '@/composables/useCharCounter';
+  import { useTextarea } from '@/composables/useTextarea';
+  import { computed, watch } from 'vue';
 
-const props = withDefaults(defineProps<{
-  maxLength?: number;
-  initialContent?: string;
-  disabled?: boolean;
-}>(), {
-  maxLength: 10000,
-  disabled: false
-});
+  const props = withDefaults(
+    defineProps<{
+      maxLength?: number;
+      initialContent?: string;
+      disabled?: boolean;
+    }>(),
+    {
+      maxLength: 10000,
+      disabled: false,
+    }
+  );
 
-const emit = defineEmits(['update:content']);
+  const emit = defineEmits(['update:content']);
 
-const { content, charCount, textareaRef, checkContentLength } = useTextarea({
-  maxLength: props.maxLength || 10000,
-  initialContent: props.initialContent,
-  maxHeight: 400,
-  onContentChange: (newContent) => emit('update:content', newContent)
-});
+  const { content, charCount, textareaRef, checkContentLength } = useTextarea({
+    maxLength: props.maxLength || 10000,
+    initialContent: props.initialContent,
+    maxHeight: 400,
+    onContentChange: (newContent) => emit('update:content', newContent),
+  });
 
-const { isHovering, handleMouseEnter, handleMouseLeave, formatNumber } =
-  useCharCounter();
+  const { isHovering, handleMouseEnter, handleMouseLeave, formatNumber } = useCharCounter();
 
-// Computed properties
-const showCounter = computed(() =>
-  isHovering.value || charCount.value > props.maxLength! / 2
-);
+  // Computed properties
+  const showCounter = computed(() => isHovering.value || charCount.value > props.maxLength! / 2);
 
-const formattedCharCount = computed(() =>
-  formatNumber(charCount.value)
-);
+  const formattedCharCount = computed(() => formatNumber(charCount.value));
 
-const formattedMaxLength = computed(() =>
-  formatNumber(props.maxLength!)
-);
+  const formattedMaxLength = computed(() => formatNumber(props.maxLength!));
 
-const statusColor = computed(() => {
-  const percentage = charCount.value / props.maxLength!;
-  if (percentage < 0.8) return 'bg-emerald-400 dark:bg-emerald-500';
-  if (percentage < 0.95) return 'bg-amber-400 dark:bg-amber-500';
-  return 'bg-red-400 dark:bg-red-500';
-});
+  const statusColor = computed(() => {
+    const percentage = charCount.value / props.maxLength!;
+    if (percentage < 0.8) return 'bg-emerald-400 dark:bg-emerald-500';
+    if (percentage < 0.95) return 'bg-amber-400 dark:bg-amber-500';
+    return 'bg-red-400 dark:bg-red-500';
+  });
 
-// Watch for changes to emit updates
-watch(content, (newContent) => {
-  emit('update:content', newContent);
-});
+  // Watch for changes to emit updates
+  watch(content, (newContent) => {
+    emit('update:content', newContent);
+  });
 </script>
 
 <template>
@@ -65,8 +61,7 @@ watch(content, (newContent) => {
       aria-label="Message content"
       autocomplete="off"
       @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-    />
+      @mouseleave="handleMouseLeave" />
 
     <!-- Character Counter -->
     <transition
@@ -75,18 +70,15 @@ watch(content, (newContent) => {
       enter-to-class="opacity-100 translate-y-0"
       leave-active-class="transition-all duration-200 ease-in"
       leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 translate-y-2"
-    >
+      leave-to-class="opacity-0 translate-y-2">
       <div
         v-show="showCounter"
         class="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-gray-900/90 px-3 py-1.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-all dark:bg-white/90 dark:text-gray-900"
         role="status"
-        aria-live="polite"
-      >
+        aria-live="polite">
         <div
           class="h-2 w-2 rounded-full transition-colors"
-          :class="statusColor"
-        ></div>
+          :class="statusColor"></div>
         {{ formattedCharCount }}/{{ formattedMaxLength }}
       </div>
     </transition>

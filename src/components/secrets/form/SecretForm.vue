@@ -162,61 +162,48 @@
 
         <!-- Footer Section -->
         <div class="border-t border-gray-200 dark:border-gray-700">
+          <!-- Actions Container -->
+          <div class="px-6 py-4">
+            <div class="flex flex-col sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <!-- Domain Preview (grows to fill available space) -->
+              <div class="order-1 sm:order-2 flex-grow min-w-0">
+                <CustomDomainPreview
+                  v-if="productIdentity.isCanonical"
+                  :available-domains="availableDomains"
+                  :with-domain-dropdown="domainsEnabled"
+                  @update:selected-domain="updateSelectedDomain"
+                  class="w-full" />
+              </div>
 
-        <!-- Actions Container -->
-        <div class="px-6 py-4">
-          <div class="flex flex-col sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <!-- Domain Preview (grows to fill available space) -->
-            <div class="order-1 sm:order-2 flex-grow min-w-0">
-              <CustomDomainPreview
-                v-if="productIdentity.isCanonical"
-                :available-domains="availableDomains"
-                :with-domain-dropdown="domainsEnabled"
-                @update:selected-domain="updateSelectedDomain"
-                class="w-full" />
-            </div>
-
-            <!-- Action Button (maintains consistent width) -->
-            <div class="order-2 sm:order-2 flex-shrink-0">
-            <div class="mb-2 ">
-              <button
-                type="submit"
-                :disabled="!hasContent || isSubmitting"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                rounded-lg  px-4 py-3 text-lg font-semibold
-                disabled:bg-brand-500/50 disabled:cursor-not-allowed
-                dark:disabled:bg-brand-600/50
-                bg-brand-500 dark:bg-brand-600
-                text-white dark:disabled:text-white/50
-                hover:bg-brand-700
-                transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
-                dark:focus:ring-offset-slate-900 whitespace-nowrap"
-              >
-                <OIcon
-                  collection="heroicons"
-                  name="lock-closed"
-                  class="size-5"
-                />
-                <span>Create Link</span>
-              </button>
-            </div>
+              <!-- Action Button (maintains consistent width) -->
+              <div class="order-2 sm:order-2 flex-shrink-0">
+                <div class="mb-2">
+                  <button
+                    type="submit"
+                    :disabled="!hasContent || isSubmitting"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-lg font-semibold disabled:bg-brand-500/50 disabled:cursor-not-allowed dark:disabled:bg-brand-600/50 bg-brand-500 dark:bg-brand-600 text-white dark:disabled:text-white/50 hover:bg-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 whitespace-nowrap">
+                    <OIcon
+                      collection="heroicons"
+                      name="lock-closed"
+                      class="size-5" />
+                    <span>Create Link</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
           <!-- Security Notice Section -->
           <!-- <div class="px-6 pb-6"> -->
           <div class="border-t border-gray-200 dark:border-gray-700">
-            <div
-              class="flex items-start gap-3 p-4 bg-brandcomp-50 dark:bg-brandcomp-900/20"
-            >
+            <div class="flex items-start gap-3 p-4 bg-brandcomp-50 dark:bg-brandcomp-900/20">
               <OIcon
                 collection="heroicons"
                 name="information-circle"
-                class="mt-0.5 h-5 w-5 flex-shrink-0 text-brandcomp-600 dark:text-brandcomp-500"
-              />
+                class="mt-0.5 h-5 w-5 flex-shrink-0 text-brandcomp-600 dark:text-brandcomp-500" />
               <p class="text-sm text-brandcomp-700 dark:text-brandcomp-300">
-                Your message will self-destruct after being viewed. The link can only be accessed once.
+                Your message will self-destruct after being viewed. The link can only be accessed
+                once.
               </p>
             </div>
           </div>
