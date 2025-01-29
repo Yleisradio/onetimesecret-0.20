@@ -53,6 +53,14 @@ const {
 } = useDomainDropdown();
 
 const hasContent = computed(() => form.secret.length > 0);
+const completionProgress = computed(() => {
+  let progress = 0;
+  if (form.secret.length > 0) progress += 50;
+  if (form.passphrase) progress += 25;
+  if (form.ttl !== expiryOptions[0].value) progress += 25;
+  return progress;
+});
+
 const expiryOptions = [
   { value: 7 * 24 * 3600, label: '7 days' },
   { value: 3 * 24 * 3600, label: '3 days' },
@@ -78,7 +86,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-w-[320px] max-w-3xl mx-auto space-y-6">
+  <div class="min-w-[320px] max-w-2xl mx-auto space-y-6">
     <!-- Enhanced Alert Display -->
     <BasicFormAlerts
       :errors="Array.from(validation.errors.values())"
@@ -87,25 +95,16 @@ onMounted(() => {
 
     <form @submit.prevent="handleConceal" class="space-y-6">
       <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-slate-900">
-        <!-- Header -->
-        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <div class="flex items-center gap-3">
-            <OIcon collection="heroicons" name="lock-closed" class="h-5 w-5 text-blue-500" />
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Prepare Message
-            </h2>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ mode === 'write' ? 'Compose' : 'Preview' }}
-            </span>
-            <button
-              type="button"
-              @click="mode = mode === 'write' ? 'preview' : 'write'"
-              class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-            >
-              <OIcon collection="heroicons" :name="mode === 'write' ? 'solid-eye' : 'pencil-square'" class="h-4 w-4" />
-            </button>
+        <!-- Header with Progress -->
+        <div class="relative border-b border-gray-200 dark:border-gray-700">
+
+
+          <!-- Progress Indicator -->
+          <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800">
+            <div
+              class="h-full bg-blue-600 dark:bg-blue-500 rounded-r transition-all duration-300"
+              :style="{ width: `${completionProgress}%` }"
+            />
           </div>
         </div>
 
@@ -116,6 +115,7 @@ onMounted(() => {
             v-model:content="form.secret"
             :disabled="isSubmitting"
             @update:content="(content) => operations.updateField('secret', content)"
+            class="bg-gray-50 dark:bg-slate-800/50 transition-colors focus-within:bg-white dark:focus-within:bg-slate-800"
           />
 
           <div class="grid gap-6 md:grid-cols-2">
@@ -166,18 +166,14 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Security Notice -->
-          <div class="flex items-start gap-3 rounded-lg bg-blue-50 p-4 text-sm dark:bg-blue-900/20">
-            <OIcon collection="heroicons" name="information-circle" class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
-            <p class="text-blue-700 dark:text-blue-300">
-              This message will self-destruct after being viewed. The link can only be accessed once.
-            </p>
-          </div>
 
-          <CustomDomainPreview v-if="productIdentity.isCanonical"
-                                            :available-domains="availableDomains"
-                                            :with-domain-dropdown="domainsEnabled"
-                                            @update:selected-domain="updateSelectedDomain" />
+          <!-- Domain Preview moved here -->
+          <CustomDomainPreview
+            v-if="productIdentity.isCanonical"
+            :available-domains="availableDomains"
+            :with-domain-dropdown="domainsEnabled"
+            @update:selected-domain="updateSelectedDomain"
+          />
         </div>
 
         <!-- Footer -->
@@ -185,17 +181,24 @@ onMounted(() => {
           <button
             type="submit"
             :disabled="!hasContent || isSubmitting"
-            class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed dark:focus:ring-offset-slate-900"
+            class="rounded-lg bg-brand-600 px-6 py-2.5 text- font-semibold text-white transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed dark:focus:ring-offset-slate-900"
           >
             <span class="flex items-center gap-2">
-              <OIcon collection="heroicons" name="check-circle" class="h-4 w-4" />
+              <OIcon collection="heroicons" name="lock-closed" class="size-5" />
               Create Link
             </span>
           </button>
         </div>
+
+
+        <!-- Security Notice -->
+                  <div class="flex items-start gap-3 rounded-lg bg-brandcomp-50 p-4 text-sm dark:bg-brandcomp-900/20">
+                    <OIcon collection="heroicons" name="information-circle" class="mt-0.5 h-5 w-5 flex-shrink-0 text-brandcomp-600 dark:text-brandcomp-500" />
+                    <p class="text-brandcomp-700 dark:text-brandcomp-300">
+                      This message will self-destruct after being viewed. The link can only be accessed once.
+                    </p>
+                  </div>
       </div>
     </form>
-
-
   </div>
 </template>

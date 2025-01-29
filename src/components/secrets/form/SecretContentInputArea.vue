@@ -41,9 +41,9 @@ const formattedMaxLength = computed(() =>
 
 const statusColor = computed(() => {
   const percentage = charCount.value / props.maxLength!;
-  if (percentage < 0.8) return 'bg-emerald-400';
-  if (percentage < 0.95) return 'bg-amber-400';
-  return 'bg-red-400';
+  if (percentage < 0.8) return 'bg-emerald-400 dark:bg-emerald-500';
+  if (percentage < 0.95) return 'bg-amber-400 dark:bg-amber-500';
+  return 'bg-red-400 dark:bg-red-500';
 });
 
 // Watch for changes to emit updates
@@ -60,7 +60,7 @@ watch(content, (newContent) => {
       :disabled="disabled"
       @input="checkContentLength"
       :maxlength="maxLength"
-      class="block w-full min-h-[200px] resize-none rounded-lg border border-gray-200 bg-white p-4 font-mono text-base leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500 dark:border-gray-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
+      class="block w-full min-h-[200px] resize-none rounded-lg border border-gray-200 p-4 font-mono text-base leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500 dark:border-gray-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 transition-all duration-200"
       :placeholder="$t('web.COMMON.secret_placeholder')"
       aria-label="Message content"
       autocomplete="off"
