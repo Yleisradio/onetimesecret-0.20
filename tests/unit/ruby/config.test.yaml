@@ -11,6 +11,11 @@
     # application itself is responsible for handling multiple domains.
     :cluster:
       :type: <%= ENV['CLUSTER_TYPE'] || nil %>
+      :api_key: <%= ENV['APPROXIMATED_API_KEY'] || nil %>
+      :cluster_ip: <%= ENV['APPROXIMATED_PROXY_CLUSTER_IP'] || '<CLUSTER_IP>' %>
+      :cluster_host: <%= ENV['APPROXIMATED_PROXY_CLUSTER_HOST'] || '<CLUSTER_HOST>' %>
+      :cluster_name: <%= ENV['APPROXIMATED_PROXY_CLUSTER_NAME'] || '<CLUSTER_NAME>' %>
+      :vhost_target: <%= ENV['APPROXIMATED_PROXY_VHOST_TARGET'] || '<VHOST_TARGET>' %>
   # Turns https/http on or off when generating links
   :ssl: true
   :secret: SuP0r_53cRU7
@@ -45,9 +50,15 @@
       - :identifier: AT
         :display_name: Atat Region
         :domain: at.example.com
+        :icon:
+          :collection: ''
+          :name: ''
       - :identifier: CE
         :display_name: CECE Region
         :domain: ce.example.com
+        :icon:
+          :collection: ''
+          :name: ''
   :support:
     :host: <%= ENV['SUPPORT_HOST'] || nil %>
   :secret_options:
@@ -81,6 +92,7 @@
   :pass: <%= ENV['SMTP_PASSWORD'] || 'pass' %>
   :auth: <%= ENV['SMTP_AUTH'] || 'login' %>
   :tls: <%= ENV['SMTP_TLS'] || true %>
+:incoming:
 :mail:
   :truemail:
     # Available validation types: :regex, :mx, :mx_blacklist, :smtp
@@ -198,6 +210,12 @@
   :add_domain: 100
   :report_exception: 5
   :attempt_secret_access: 10
+  :check_status: 100
+  :update_branding: 100
+  :remove_domain: 100
+  :list_domains: 100
+  :get_domain: 100
+  :verify_domain: 100
 :development:
   :enabled: <%= ['development', 'dev'].include?(ENV['RACK_ENV']) %>
   :debug: <%= ['true', '1', 'yes'].include?(ENV['ONETIME_DEBUG']) %>
@@ -219,4 +237,6 @@
   # be enabled in production environments.
   :freeze_app: true
   :csp:
+    :enabled: false
+  :markdown:
     :enabled: false

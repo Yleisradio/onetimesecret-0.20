@@ -19,7 +19,7 @@
 :site: include(':site')
 :redis: include(':redis')
 :colonels: list(str(), required=True)
-:incoming: include(':incoming')
+:incoming: include(':incoming', required=False)
 :emailer: include(':emailer')
 :mail: include(':mail')
 :locales: list(str())
@@ -121,17 +121,17 @@
   :tls: any()
 
 :dbs:
-  :session: str(required=False)
-  :splittest: str(required=False)
-  :custom_domain: str(required=False)
-  :customer: str(required=False)
-  :subdomain: str(required=False)
-  :metadata: str(required=False)
-  :email_receipt: str(required=False)
-  :secret: str(required=False)
-  :rate_limit: str(required=False)
-  :feedback: str(required=False)
-  :exception_info: str(required=False)
+  :session: any(str(), int(), null())
+  :splittest: any(str(), int(), null())
+  :custom_domain: any(str(), int(), null())
+  :customer: any(str(), int(), null())
+  :subdomain: any(str(), int(), null())
+  :metadata: any(str(), int(), null())
+  :email_receipt: any(str(), int(), null())
+  :secret: any(str(), int(), null())
+  :rate_limit: any(str(), int(), null())
+  :feedback: any(str(), int(), null())
+  :exception_info: any(str(), int(), null())
 
 :mail:
   :truemail:
@@ -200,8 +200,8 @@
   :frontend_host: str()
 
 :experimental:
-  :freeze_app: bool()
+  :freeze_app: any(str(), bool())
   :csp:
-    :enabled: str()
+    :enabled: any(str(), bool())
   :markdown:
-    :enabled: str()
+    :enabled: any(str(), bool())
