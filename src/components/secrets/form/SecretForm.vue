@@ -102,10 +102,12 @@
       class="sticky top-4 z-50" />
 
     <form
+      ref="form1"
       @submit.prevent="handleConceal"
       class="space-y-6">
       <div
-        class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-slate-900">
+        ref="div1"
+        class="overflow-visible rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-slate-900">
         <!-- Header Section -->
         <div class="relative border-b border-gray-200 dark:border-gray-700">
           <!-- Progress Indicator -->

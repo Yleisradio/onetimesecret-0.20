@@ -69,6 +69,7 @@
       :placeholder="$t('web.COMMON.secret_placeholder')"
       aria-label="Message content"
       autocomplete="off"
+      autofocus
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave" />
 
