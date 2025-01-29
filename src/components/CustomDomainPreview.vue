@@ -1,23 +1,23 @@
 <!-- src/components/CustomDomainPreview.vue -->
 
 <script setup lang="ts">
-/**
- * CustomDomainPreview Component
- *
- * Technical Implementation:
- * - Uses composition API with dedicated composables:
- *   - useDropdown: Manages dropdown state and interactions
- *   - useDomainDropdown: Handles domain selection state
- *
- * Props:
- * @prop {string[]} [availableDomains] - List of available domains for selection
- * @prop {boolean} [withDomainDropdown=false] - Enable/disable domain selection
- *
- * Events:
- * @emits {string} update:selected-domain - Emitted when domain selection changes
- * @see {@link useDropdown} For dropdown behavior implementation
- * @see {@link useDomainDropdown} For domain selection implementation
- */
+  /**
+   * CustomDomainPreview Component
+   *
+   * Technical Implementation:
+   * - Uses composition API with dedicated composables:
+   *   - useDropdown: Manages dropdown state and interactions
+   *   - useDomainDropdown: Handles domain selection state
+   *
+   * Props:
+   * @prop {string[]} [availableDomains] - List of available domains for selection
+   * @prop {boolean} [withDomainDropdown=false] - Enable/disable domain selection
+   *
+   * Events:
+   * @emits {string} update:selected-domain - Emitted when domain selection changes
+   * @see {@link useDropdown} For dropdown behavior implementation
+   * @see {@link useDomainDropdown} For domain selection implementation
+   */
   import OIcon from '@/components/icons/OIcon.vue';
   import { useDomainDropdown } from '@/composables/useDomainDropdown';
   import { useDropdown } from '@/composables/useDropdown';
@@ -80,9 +80,8 @@
     if (e.key === 'ArrowDown') {
       activeIndex.value = (activeIndex.value + 1) % props.availableDomains?.length;
     } else {
-      activeIndex.value = activeIndex.value <= 0
-        ? props.availableDomains.length - 1
-        : activeIndex.value - 1;
+      activeIndex.value =
+        activeIndex.value <= 0 ? props.availableDomains.length - 1 : activeIndex.value - 1;
     }
   });
 
@@ -108,19 +107,23 @@
   });
 
   // Watch for changes in availableDomains to simulate loading state
-  watch(() => props.availableDomains, (newDomains) => {
-    if (!newDomains) {
-      isLoading.value = true;
-    } else {
-      isLoading.value = false;
-    }
-  }, { immediate: true });
+  watch(
+    () => props.availableDomains,
+    (newDomains) => {
+      if (!newDomains) {
+        isLoading.value = true;
+      } else {
+        isLoading.value = false;
+      }
+    },
+    { immediate: true }
+  );
 </script>
 
 <template>
   <div
     v-if="withDomainDropdown"
-    class="mb-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 border-dashed ">
+    class="mb-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 border-dashed">
     <div class="flex items-center font-mono text-gray-600 dark:text-gray-400">
       <OIcon
         collection="heroicons"
@@ -130,40 +133,42 @@
       <div class="flex items-center flex-1">
         <div
           ref="dropdownRef"
-          class="relative max-w-full">
+          class="relative w-full min-w-0">
           <button
             ref="buttonRef"
             type="button"
             @click="isOpen = !isOpen"
-            class="w-full max-w-full text-left truncate appearance-none bg-transparent group
-              cursor-pointer px-0 flex items-center font-mono
-              focus:outline-none focus:ring-2 focus:ring-brandcomp-500/50
-              focus:ring-offset-2 focus:ring-offset-gray-50
-              dark:focus:ring-offset-gray-800 rounded-sm
-              transition-shadow"
+            class="w-full text-left appearance-none bg-transparent group cursor-pointer px-0 flex items-center font-mono focus:outline-none focus:ring-2 focus:ring-brandcomp-500/50 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-gray-800 rounded-sm transition-shadow overflow-hidden"
             aria-haspopup="listbox"
             :aria-expanded="isOpen"
             :aria-label="`Select domain. Currently selected: ${selectedDomain}. Press Space or Enter to open dropdown`">
-            <span class="text-gray-600/50 dark:text-gray-600">https://</span>
-            <span class="border-b-2 border-transparent
-              truncate inline-block
-              group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400
-              transition-colors">{{ selectedDomain }}</span>
-            <span class="text-gray-600/50 dark:text-gray-600">/secret/</span>
-            <span class="bg-gradient-to-r from-gray-600/50 to-transparent bg-clip-text
-              text-transparent">abcdef123456</span>
-            <OIcon
-              collection="heroicons"
-              name="chevron-dow3n"
-              class="h-4 w-4 ml-1 text-gray-400 group-hover:text-brandcomp-500
-              dark:group-hover:text-brandcomp-400" />
+            <div class="flex items-center min-w-0 flex-1">
+              <span class="flex-shrink-0 text-gray-600/50 dark:text-gray-600">https://</span>
+              <span
+                class="border-b-2 border-transparent truncate inline-block group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400 transition-colors flex-shrink-1 min-w-0"
+                >{{ selectedDomain }}</span>
+              <span class="flex-shrink-0 text-gray-600/50 dark:text-gray-600">/secret/</span>
+              <span
+                class="flex-shrink-1 bg-gradient-to-r from-gray-600/50 to-transparent bg-clip-text text-transparent"
+                >abcdef123456</span
+              >
+            </div>
+            <!-- Icon always visible -->
+                  <OIcon
+                    collection="heroicons"
+                    name="chevron-down"
+                    class="h-4 w-4 ml-1 flex-shrink-0 text-gray-400 group-hover:text-brandcomp-500
+                    dark:group-hover:text-brandcomp-400"
+                  />
           </button>
 
           <div
             v-if="isOpen"
             class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/70 rounded-md shadow-lg"
             role="listbox">
-            <div v-if="isLoading" class="p-2 text-center text-gray-500 dark:text-gray-400">
+            <div
+              v-if="isLoading"
+              class="p-2 text-center text-gray-500 dark:text-gray-400">
               Loading...
             </div>
             <div
@@ -175,39 +180,37 @@
               role="option"
               :aria-selected="domain === selectedDomain"
               :class="[
-                  'p-2 flex items-center gap-2 transition-colors',
-                  'cursor-pointer select-none',
-                  {
-                    'bg-brandcomp-50 dark:bg-brandcomp-900/20 text-brandcomp-700 dark:text-brandcomp-300':
-                      domain === selectedDomain || index === activeIndex,
-                    'hover:bg-gray-50 dark:hover:bg-gray-700':
-                      domain !== selectedDomain && index !== activeIndex
-                  }
-                ]">
-                <OIcon
-                  v-if="domain === selectedDomain"
-                  collection="heroicons"
-                  name="check"
-                  class="h-4 w-4 shrink-0"
-                />
-                <span :class="{'pl-6': !(domain === selectedDomain)}">{{ domain }}</span>
+                'p-2 flex items-center gap-2 transition-colors',
+                'cursor-pointer select-none',
+                {
+                  'bg-brandcomp-50 dark:bg-brandcomp-900/20 text-brandcomp-700 dark:text-brandcomp-300':
+                    domain === selectedDomain || index === activeIndex,
+                  'hover:bg-gray-50 dark:hover:bg-gray-700':
+                    domain !== selectedDomain && index !== activeIndex,
+                },
+              ]">
+              <OIcon
+                v-if="domain === selectedDomain"
+                collection="heroicons"
+                name="check"
+                class="h-4 w-4 shrink-0" />
+              <span :class="{ 'pl-6': !(domain === selectedDomain) }">{{ domain }}</span>
             </div>
             <div
               v-if="!authenticated"
               class="p-2 hover:text-brandcomp-600 dark:hover:text-brandcomp-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
               role="option"
               :class="[
-                  'p-2 flex items-center gap-2 transition-colors',
-                  'cursor-pointer select-none',
-                  'hover:bg-gray-50 dark:hover:bg-gray-700',
-                ]">
-                <OIcon
-                  v-if="false"
-                  collection="heroicons"
-                  name="check"
-                  class="h-4 w-4 shrink-0"
-                />
-                <router-link to="/pricing">Upgrade for secrets.yourdomain.com</router-link>
+                'p-2 flex items-center gap-2 transition-colors',
+                'cursor-pointer select-none',
+                'hover:bg-gray-50 dark:hover:bg-gray-700',
+              ]">
+              <OIcon
+                v-if="false"
+                collection="heroicons"
+                name="check"
+                class="h-4 w-4 shrink-0" />
+              <router-link to="/pricing">Upgrade for secrets.yourdomain.com</router-link>
             </div>
           </div>
         </div>
@@ -217,7 +220,7 @@
 </template>
 
 <style scoped>
-select {
+  select {
   -webkit-appearance: none;
   -moz-appearance: none;
   border: none;
