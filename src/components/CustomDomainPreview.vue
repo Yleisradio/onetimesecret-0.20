@@ -66,7 +66,7 @@
 <template>
   <div
     v-if="withDomainDropdown"
-    class="mb-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800  border border-gray-400 border-dashed ">
+    class="mb-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 border-dashed ">
     <div class="flex items-center font-mono text-gray-600 dark:text-gray-400">
       <OIcon
         collection="heroicons"
@@ -81,22 +81,26 @@
             type="button"
             @click="isOpen = !isOpen"
             class="w-full text-left appearance-none bg-transparent group
-            hover:text-brandcomp-600 dark:hover:text-brandcomp-400 cursor-pointer
-            focus:outline-none px-0 flex items-center font-mono"
+            cursor-pointer focus:outline-none px-0 flex items-center font-mono"
             aria-haspopup="listbox"
             :aria-expanded="isOpen">
-            <span class="">https://</span>
-            <span class="font-bold">{{ selectedDomain }}</span>
-            <span class="">/secret/</span><span class="blur-sm">000000000000000 &nbsp;&nbsp;</span>
+            <span class="text-gray-600/50 dark:text-gray-600">https://</span>
+            <span class="border-b-2 border-transparent
+              group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400
+              transition-colors">{{ selectedDomain }}</span>
+            <span class="text-gray-600/50 dark:text-gray-600">/secret/</span>
+            <span class="bg-gradient-to-r from-gray-600/50 to-transparent bg-clip-text
+              text-transparent">abcdef123456</span>
             <OIcon
               collection="heroicons"
-              name="chevron-down"
-              class="h-4 w-4 ml-1 text-gray-400 group-hover:text-brandcomp-500 dark:group-hover:text-brandcomp-400" />
+              name="chevron-dow3n"
+              class="h-4 w-4 ml-1 text-gray-400 group-hover:text-brandcomp-500
+              dark:group-hover:text-brandcomp-400" />
           </button>
 
           <div
             v-if="isOpen"
-            class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg"
+            class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/70 rounded-md shadow-lg"
             role="listbox">
             <div v-if="isLoading" class="p-2 text-center text-gray-500 dark:text-gray-400">
               Loading...
@@ -108,9 +112,21 @@
               @click="selectDomain(domain)"
               class="p-2 hover:text-brandcomp-600 dark:hover:text-brandcomp-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
               role="option"
-              :aria-selected="domain === selectedDomain">
-              <span class="texts-gray-500">https://</span>
-              <span class="font-bold">{{ domain }}</span>
+              :aria-selected="domain === selectedDomain"
+                :class="[
+                  'p-2 flex items-center gap-2 transition-colors',
+                  'cursor-pointer select-none',
+                  domain === selectedDomain
+                    ? 'bg-brandcomp-50 dark:bg-brandcomp-900/20 text-brandcomp-700 dark:text-brandcomp-300'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                ]">
+                <OIcon
+                  v-if="domain === selectedDomain"
+                  collection="heroicons"
+                  name="check"
+                  class="h-4 w-4 shrink-0"
+                />
+                <span :class="{'pl-6': !(domain === selectedDomain)}">{{ domain }}</span>
             </div>
           </div>
         </div>
