@@ -74,8 +74,64 @@ module Onetime::Logic
             # happens in success_data). This is a feature, not a
             # bug but it means that all return values need to be
             # pluck out of the secret object before this is called.
-            secret.received!
-
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #secret.received!
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
+            p [:'RECEIVING_IS_DISABLED!!!!']
             OT::Logic.stathat_count("Viewed Secrets", 1)
           end
 
