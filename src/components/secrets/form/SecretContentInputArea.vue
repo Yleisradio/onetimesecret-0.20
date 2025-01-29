@@ -74,147 +74,66 @@
  *   @update:content="secretContent = $event"
  * />
  */
+ import OIcon from '@/components/icons/OIcon.vue';
+ import { useCharCounter } from '@/composables/useCharCounter';
+ import { useDomainDropdown } from '@/composables/useDomainDropdown';
+ import { useDropdown } from '@/composables/useDropdown';
+ import { useTextarea } from '@/composables/useTextarea';
+ import { computed, watch } from 'vue';
 
-// 1. Imports
-import OIcon from '@/components/icons/OIcon.vue';
-import { computed, ref, onMounted, onUnmounted, watch, WatchStopHandle } from 'vue';
-import { WindowService } from '@/services/window.service';
+ const props = withDefaults(defineProps<{
+   availableDomains?: string[];
+   initialDomain?: string;
+   withDomainDropdown?: boolean;
+   maxLength?: number;
+   initialContent?: string;
+ }>(), {
+   initialDomain: '',
+   withDomainDropdown: false,
+ });
 
-const availablePlans = WindowService.get('available_plans') ?? [];
-const cust = WindowService.get('cust');
+ const emit = defineEmits(['update:selected-domain', 'update:content']);
 
-const planOptions = cust?.plan.options || availablePlans?.anonymous.options;
-const maxSize = planOptions?.size || 10000; // in characters
+ const { content, charCount, textareaRef, checkContentLength } = useTextarea({
+   maxLength: props.maxLength || 10000,
+   initialContent: props.initialContent,
+   maxHeight: 400,
+   onContentChange: (newContent) => emit('update:content', newContent)
+ });
 
-const isHovering = ref(false);
+ const { isOpen, dropdownRef, toggle: toggleDropdown, close: closeDropdown } =
+   useDropdown();
 
-const showCounter = computed(() => {
-  return isHovering.value || charCount.value > localMaxLength.value / 2;
-});
+ const { isHovering, handleMouseEnter, handleMouseLeave, formatNumber } =
+   useCharCounter();
 
-const handleMouseEnter = () => {
-  isHovering.value = true;
-};
+ const { selectedDomain, updateSelectedDomain } = useDomainDropdown();
 
-const handleMouseLeave = () => {
-  isHovering.value = false;
-};
+ // Computed properties
+ const showCounter = computed(() =>
+   isHovering.value || charCount.value > props.maxLength! / 2
+ );
 
-// New function to format numbers
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat().format(num);
-};
+ const formattedCharCount = computed(() =>
+   formatNumber(charCount.value)
+ );
 
-// Computed property for formatted character count
-const formattedCharCount = computed(() => formatNumber(charCount.value));
+ const formattedMaxLength = computed(() =>
+   formatNumber(props.maxLength!)
+ );
 
-// Computed property for formatted max length
-const formattedMaxLength = computed(() => formatNumber(localMaxLength.value));
+ // Watch for changes to emit updates
+ watch(content, (newContent) => {
+   emit('update:content', newContent);
+ });
 
-
-// 2. Interface and Props
-interface Props {
-  availableDomains?: string[];
-  initialDomain?: string;
-  withDomainDropdown?: boolean;
-  maxLength?: number;
-  initialContent?: string;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  initialDomain: '',
-  withDomainDropdown: false,
-});
-
-// 3. Emits
-const emit = defineEmits(['update:selected-domain', 'update:content']);
-
-// 4. Refs
-const content = ref(props.initialContent || '');
-const charCount = ref(0);
-const isOpen = ref(false);
-const selectedDomain = ref(props.initialDomain);
-const dropdownRef = ref<HTMLElement | null>(null);
-const textareaRef = ref<HTMLTextAreaElement | null>(null);
-const maxHeight = 400; // Maximum height in pixels
-const localMaxLength = ref(props.maxLength || maxSize);
-let watchStop: WatchStopHandle | null = null; // To store the watcher stop function
-
-// 5. Methods
-const toggleDropdown = (event: Event) => {
-  event.stopPropagation();
-  isOpen.value = !isOpen.value;
-};
-
-const selectDomain = (domain: string) => {
-  selectedDomain.value = domain;
-  emit('update:selected-domain', domain);
-  isOpen.value = false;
-};
-
-const closeDropdown = () => {
-  isOpen.value = false;
-};
-
-const handleClickOutside = (event: MouseEvent) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-    closeDropdown();
-  }
-};
-
-const handleEscapeKey = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    closeDropdown();
-  }
-};
-
-const adjustTextareaHeight = () => {
-  if (textareaRef.value) {
-    textareaRef.value.style.height = 'auto';
-    const newHeight = Math.min(textareaRef.value.scrollHeight, maxHeight);
-    textareaRef.value.style.height = newHeight + 'px';
-
-    // If we've reached the max height, stop the watcher
-    if (newHeight >= maxHeight && watchStop) {
-      watchStop();
-      watchStop = null; // Clear the reference
-    }
-  }
-};
-
-const checkContentLength = (event: Event) => {
-  const target = event.target as HTMLTextAreaElement;
-  if (target.value.length <= localMaxLength.value) {
-    content.value = target.value;
-    charCount.value = target.value.length;
-  } else {
-    // Truncate the input if it exceeds the max length
-    content.value = target.value.slice(0, props.maxLength);
-    charCount.value = localMaxLength.value;
-    target.value = content.value; // Update the textarea value
-  }
-  adjustTextareaHeight();
-  emit('update:content', content.value);
-};
-
-// 6. Watchers
-watchStop = watch(content, (newContent) => {
-  emit('update:content', newContent);
-  adjustTextareaHeight();
-});
-
-// 7. Lifecycle Hooks
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-  document.addEventListener('keydown', handleEscapeKey);
-  adjustTextareaHeight();
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-  document.removeEventListener('keydown', handleEscapeKey);
-});
-</script>
+ // Domain selection handler
+ const selectDomain = (domain: string) => {
+   updateSelectedDomain(domain);
+   emit('update:selected-domain', domain);
+   closeDropdown();
+ };
+ </script>
 
 <template>
   <div
@@ -248,6 +167,7 @@ onUnmounted(() => {
     <div
       v-if="showCounter"
       class="pointer-events-none select-none hidden
+            absolute bottom-4 right-4
             rounded-full bg-white px-3 py-1
             text-sm text-gray-400
             shadow-sm
