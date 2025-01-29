@@ -99,7 +99,37 @@ describe('SecretContentInputArea', () => {
       });
 
       const dropdown = wrapper.find('[role="menu"]');
+      expect(dropdown.exists()).toBe(false);
+    });
+
+    it('renders domain dropdown when enabled and clicked', async () => {
+      const wrapper = mountComponent({
+        withDomainDropdown: true,
+        availableDomains: domains,
+      });
+
+      // First verify the dropdown button exists
+      const dropdownButton = wrapper.find('button');
+      expect(dropdownButton.exists()).toBe(true);
+
+      // Click to open the dropdown
+      await dropdownButton.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      // Now verify the dropdown menu is visible
+      const dropdown = wrapper.find('[role="menu"]');
       expect(dropdown.exists()).toBe(true);
+    });
+
+    // Add test for initial state
+    it('does not show dropdown menu initially', () => {
+      const wrapper = mountComponent({
+        withDomainDropdown: true,
+        availableDomains: domains,
+      });
+
+      const dropdown = wrapper.find('[role="menu"]');
+      expect(dropdown.exists()).toBe(false);
     });
 
     it('emits selected domain', async () => {
