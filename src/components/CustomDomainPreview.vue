@@ -128,12 +128,12 @@
       <div class="flex items-center flex-1">
         <div
           ref="dropdownRef"
-          class="relative inline-block flex-1">
+          class="relative max-w-full">
           <button
             ref="buttonRef"
             type="button"
             @click="isOpen = !isOpen"
-            class="w-full text-left appearance-none bg-transparent group
+            class="w-full max-w-full text-left truncate appearance-none bg-transparent group
               cursor-pointer px-0 flex items-center font-mono
               focus:outline-none focus:ring-2 focus:ring-brandcomp-500/50
               focus:ring-offset-2 focus:ring-offset-gray-50
@@ -144,6 +144,7 @@
             :aria-label="`Select domain. Currently selected: ${selectedDomain}. Press Space or Enter to open dropdown`">
             <span class="text-gray-600/50 dark:text-gray-600">https://</span>
             <span class="border-b-2 border-transparent
+              truncate inline-block
               group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400
               transition-colors">{{ selectedDomain }}</span>
             <span class="text-gray-600/50 dark:text-gray-600">/secret/</span>
