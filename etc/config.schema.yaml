@@ -25,6 +25,7 @@
 :locales: list(str())
 :services: include(':services')
 :limits: include(':limits')
+:stathat: include(':stathat', required=False)
 :development: include(':development')
 :experimental: include(':experimental')
 
@@ -70,6 +71,14 @@
   :enabled: any()
   :stripe_key: str(required=False)
   :webook_signing_secret: str(required=False)
+  :payment_links: include(':payment_links', required=False)
+
+:payment_links:
+  :identity:
+    :tierid: str()
+    :month: str()
+    :year: str()
+  :dedication: any()
 
 :support:
   :host: str(required=False)
@@ -93,6 +102,7 @@
   :enabled: bool()
   :email: str()
   :passphrase: str()
+  :regex: str()
 
 :redis:
   :uri: str()
@@ -105,9 +115,9 @@
   :fromname: str()
   :host: str()
   :port: any()
-  :user: str()
-  :pass: str()
-  :auth: str()
+  :user: any(str(), null())
+  :pass: any(str(), null())
+  :auth: any(str(), bool())
   :tls: any()
 
 :dbs:
@@ -146,8 +156,9 @@
     :email_pattern: str(required=False)
     :smtp_error_body_pattern: str(required=False)
     :logger:
-      :tracking_event: str()
-      :stdout: bool()
+      tracking_event: str(required=False)
+      stdout: bool(required=False)
+      log_absolute_path: str(required=False)
 
 :services:
   :sentry:
@@ -170,7 +181,6 @@
   :destroy_account: int()
   :forgot_password_request: int()
   :forgot_password_reset: int()
-  :generate_apikey: int()
   :update_branding: int()
   :add_domain: int()
   :remove_domain: int()
@@ -181,6 +191,8 @@
   :generate_apitoken: int()
   :create_account: int()
   :attempt_secret_access: int()
+
+:stathat: any()
 
 :development:
   :enabled: any()

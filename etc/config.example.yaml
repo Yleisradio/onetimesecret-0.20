@@ -117,14 +117,15 @@
   :fromname: <%= ENV['FROMNAME'] || 'Support' %>
   :host: <%= ENV['SMTP_HOST'] || 'smtp.provider.com' %>
   :port: <%= ENV['SMTP_PORT'] || 587 %>
-  :user: <%= ENV['SMTP_USERNAME'] %>
-  :pass: <%= ENV['SMTP_PASSWORD'] %>
+  :user: <%= ENV['SMTP_USERNAME'] || '~' %>
+  :pass: <%= ENV['SMTP_PASSWORD'] || '~'  %>
   :auth: <%= ENV['SMTP_AUTH'] || 'login' %>
   :tls: <%= ENV['SMTP_TLS'] %>
 :incoming:
   :enabled: false
   :email: CHANGEME@example.com
   :passphrase: abacus
+  :regex: '\A[a-zA-Z0-9]{6}\z'
 :mail:
   :truemail:
     # Available validation types: :regex, :mx, :mx_blacklist, :smtp
@@ -189,10 +190,9 @@
     # write access to the log file. The log file will be created if it
     # does not exist. Log file rotation is not handled by the app.
     :logger:
-      # One of: :error (default), :unrecognized_error,
-      # :recognized_error, :all.
-      :tracking_event: :error
-      :stdout: true
+      # One of: :error (default), :unrecognized_error, :recognized_error, :all.
+      tracking_event: :error
+      stdout: true
       # log_absolute_path: '/home/app/log/truemail.log'
 :locales:
   # A list of ISO language codes (e.g., 'en' for English, 'es'
@@ -252,7 +252,7 @@
   :destroy_account: 2
   :forgot_password_request: 2
   :forgot_password_reset: 3
-  :generate_apitoken: 10
+  :generate_apitoken: 50
   :add_domain: 30
   :remove_domain: 30
   :list_domains: 100
@@ -261,7 +261,6 @@
   :report_exception: 50
   :attempt_secret_access: 10
   :check_status: 1000
-  :generate_apikey: 50
   :update_branding: 50
 
 :development:
