@@ -162,40 +162,43 @@
 
         <!-- Footer Section -->
         <div class="border-t border-gray-200 dark:border-gray-700">
-          <!-- Actions Container -->
-          <div class="px-6 py-4">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <!-- Domain Preview (grows to fill available space) -->
-              <div class="order-1 sm:order-2 flex-grow min-w-0">
-                <CustomDomainPreview
-                  v-if="productIdentity.isCanonical"
-                  :available-domains="availableDomains"
-                  :with-domain-dropdown="domainsEnabled"
-                  @update:selected-domain="updateSelectedDomain"
-                  class="w-full" />
-              </div>
 
-              <!-- Action Button (maintains consistent width) -->
-              <div class="order-2 sm:order-2 flex-shrink-0">
-                <button
-                  type="submit"
-                  :disabled="!hasContent || isSubmitting"
-                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                  rounded-lg bg-brand-600 p-3 h-[46px] text-sm font-semibold text-white
-                  transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2
-                  focus:ring-brand-500 focus:ring-offset-2 disabled:bg-gray-400
-                  disabled:cursor-not-allowed dark:focus:ring-offset-slate-900"
-                >
-                  <OIcon
-                    collection="heroicons"
-                    name="lock-closed"
-                    class="size-5"
-                  />
-                  <span>Create Link</span>
-                </button>
-              </div>
+        <!-- Actions Container -->
+        <div class="px-6 py-4">
+          <div class="flex flex-col sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <!-- Domain Preview (grows to fill available space) -->
+            <div class="order-1 sm:order-2 flex-grow min-w-0">
+              <CustomDomainPreview
+                v-if="productIdentity.isCanonical"
+                :available-domains="availableDomains"
+                :with-domain-dropdown="domainsEnabled"
+                @update:selected-domain="updateSelectedDomain"
+                class="w-full" />
+            </div>
+
+            <!-- Action Button (maintains consistent width) -->
+            <div class="order-2 sm:order-2 flex-shrink-0">
+            <div class="mb-2 ">
+              <button
+                type="submit"
+                :disabled="!hasContent || isSubmitting"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2
+                rounded-lg bg-brand-600 px-4 py-3 text-lg font-semibold text-white
+                transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2
+                focus:ring-brand-500 focus:ring-offset-2 disabled:bg-gray-400
+                disabled:cursor-not-allowed dark:focus:ring-offset-slate-900"
+              >
+                <OIcon
+                  collection="heroicons"
+                  name="lock-closed"
+                  class="size-5"
+                />
+                <span>Create Link</span>
+              </button>
+            </div>
             </div>
           </div>
+        </div>
 
           <!-- Security Notice Section -->
           <!-- <div class="px-6 pb-6"> -->

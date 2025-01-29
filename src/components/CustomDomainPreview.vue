@@ -130,7 +130,7 @@
         name="globe-alt-solid"
         class="size-5 shrink-0 text-gray-400 dark:text-gray-500 mr-2" />
 
-      <div class="flex items-center flex-1">
+
         <div
           ref="dropdownRef"
           class="relative w-full min-w-0">
@@ -233,7 +233,7 @@
         </div>
       </div>
     </div>
-  </div>
+
 </template>
 
 <style scoped>
