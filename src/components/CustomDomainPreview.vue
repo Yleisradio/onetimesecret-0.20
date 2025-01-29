@@ -21,8 +21,8 @@
   import OIcon from '@/components/icons/OIcon.vue';
   import { useDomainDropdown } from '@/composables/useDomainDropdown';
   import { useDropdown } from '@/composables/useDropdown';
-  import { onClickOutside } from '@vueuse/core';
-  import { watch } from 'vue';
+  import { onClickOutside, onKeyStroke } from '@vueuse/core';
+  import { watch, ref } from 'vue';
 
   const props = withDefaults(
     defineProps<{
@@ -43,15 +43,67 @@
   const { isOpen, dropdownRef, close } = useDropdown();
   const { selectedDomain, updateSelectedDomain, isLoading } = useDomainDropdown();
 
-  onClickOutside(dropdownRef, () => {
-    close();
-  });
+  const activeIndex = ref(-1);
+  const buttonRef = ref<HTMLButtonElement | null>(null);
 
   const selectDomain = (domain: string) => {
     updateSelectedDomain(domain);
     emit('update:selected-domain', domain);
     close();
   };
+
+  onClickOutside(dropdownRef, () => {
+    close();
+  });
+
+  // Keyboard navigation
+  onKeyStroke('Space', (e) => {
+    if (document.activeElement === buttonRef.value) {
+      e.preventDefault();
+      isOpen.value = !isOpen.value;
+    }
+  });
+
+  // Arrow key navigation
+  onKeyStroke(['ArrowDown', 'ArrowUp'], (e) => {
+    if (!props.availableDomains?.length) return;
+
+    e.preventDefault();
+    if (!isOpen.value) {
+      isOpen.value = true;
+      activeIndex.value = 0;
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      activeIndex.value = (activeIndex.value + 1) % props.availableDomains?.length;
+    } else {
+      activeIndex.value = activeIndex.value <= 0
+        ? props.availableDomains.length - 1
+        : activeIndex.value - 1;
+    }
+  });
+
+  // Enter to select highlighted item
+  onKeyStroke('Enter', (e) => {
+    if (isOpen.value && activeIndex.value >= 0) {
+      e.preventDefault();
+      const domain = props.availableDomains?.[activeIndex.value];
+      if (domain) selectDomain(domain);
+    }
+  });
+
+  onKeyStroke('Escape', () => {
+    if (isOpen.value) {
+      close();
+      buttonRef.value?.focus();
+    }
+  });
+
+  // Reset active index when dropdown closes
+  watch(isOpen, (newValue) => {
+    if (!newValue) activeIndex.value = -1;
+  });
 
   // Watch for changes in availableDomains to simulate loading state
   watch(() => props.availableDomains, (newDomains) => {
@@ -78,12 +130,18 @@
           ref="dropdownRef"
           class="relative inline-block flex-1">
           <button
+            ref="buttonRef"
             type="button"
             @click="isOpen = !isOpen"
             class="w-full text-left appearance-none bg-transparent group
-            cursor-pointer focus:outline-none px-0 flex items-center font-mono"
+              cursor-pointer px-0 flex items-center font-mono
+              focus:outline-none focus:ring-2 focus:ring-brandcomp-500/50
+              focus:ring-offset-2 focus:ring-offset-gray-50
+              dark:focus:ring-offset-gray-800 rounded-sm
+              transition-shadow"
             aria-haspopup="listbox"
-            :aria-expanded="isOpen">
+            :aria-expanded="isOpen"
+            :aria-label="`Select domain. Currently selected: ${selectedDomain}. Press Space or Enter to open dropdown`">
             <span class="text-gray-600/50 dark:text-gray-600">https://</span>
             <span class="border-b-2 border-transparent
               group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400
@@ -107,18 +165,21 @@
             </div>
             <div
               v-else
-              v-for="domain in availableDomains"
+              v-for="(domain, index) in availableDomains"
               :key="domain"
               @click="selectDomain(domain)"
               class="p-2 hover:text-brandcomp-600 dark:hover:text-brandcomp-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
               role="option"
               :aria-selected="domain === selectedDomain"
-                :class="[
+              :class="[
                   'p-2 flex items-center gap-2 transition-colors',
                   'cursor-pointer select-none',
-                  domain === selectedDomain
-                    ? 'bg-brandcomp-50 dark:bg-brandcomp-900/20 text-brandcomp-700 dark:text-brandcomp-300'
-                    : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                  {
+                    'bg-brandcomp-50 dark:bg-brandcomp-900/20 text-brandcomp-700 dark:text-brandcomp-300':
+                      domain === selectedDomain || index === activeIndex,
+                    'hover:bg-gray-50 dark:hover:bg-gray-700':
+                      domain !== selectedDomain && index !== activeIndex
+                  }
                 ]">
                 <OIcon
                   v-if="domain === selectedDomain"
