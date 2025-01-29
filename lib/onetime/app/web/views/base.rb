@@ -86,7 +86,7 @@ module Onetime
         # Ensure that these keys are always present in jsvars, even if nil
         ensure_exist = [:domains_enabled, :custid, :cust, :email, :customer_since, :custom_domains]
 
-        self[:jsvars][:domains_enabled] = jsvar(domains_enabled) # only for authenticated
+        self[:jsvars][:domains_enabled] = jsvar(domains_enabled)
 
         self[:jsvars][:features] = jsvar({
           markdown: experimental.dig(:markdown, :enabled) || false,
@@ -122,7 +122,7 @@ module Onetime
           # We do this so that in our typescript we can assume either a value
           # or nil (null), avoiding undefined altogether.
           ensure_exist.each do |key|
-            self[:jsvars][key] = jsvar(nil)
+            self[:jsvars][key] = jsvar(nil) unless self[:jsvars].key?(key)
           end
         end
 
