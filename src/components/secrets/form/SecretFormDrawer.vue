@@ -88,11 +88,14 @@ const collapsedBgClass = computed(() => props.collapsedBg);
       'rounded-lg transition-all duration-200 ease-in-out',
       borderClass,
       isExpanded
-        ? `mb-3 p-3 ${expandedBgClass}`
+        ? `mb-2 p-3 ${expandedBgClass}`
         : `mb-2 p-2 ${collapsedBgClass}`
     ]">
     <div
       @click="toggleExpanded"
+      role="button"
+      :aria-expanded="isExpanded"
+      :aria-controls="`${title}-content`"
       class="flex cursor-pointer items-center justify-between">
       <p class="font-brand text-base font-medium text-gray-700 dark:text-gray-300">
         {{ title }}
@@ -105,9 +108,11 @@ const collapsedBgClass = computed(() => props.collapsedBg);
     </div>
     <div
       v-if="isExpanded"
+      :id="`${title}-content`"
+      :aria-labelledby="`${title}-header`"
       class="mt-2"
       @click.stop>
-      <slot></slot>
+      <slot :isExpanded="isExpanded"></slot>
     </div>
   </div>
 </template>
