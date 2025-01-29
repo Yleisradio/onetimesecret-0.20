@@ -105,7 +105,7 @@ onMounted(() => {
       <CustomDomainPreview v-if="productIdentity.isCanonical"
                                         :available-domains="availableDomains"
                                         :with-domain-dropdown="domainsEnabled"
-                                        data-testid="custom-domain-preview"
+
                                         @update:selected-domain="updateSelectedDomain" />
 
       <div class="mb-4 flex w-full space-x-2">
