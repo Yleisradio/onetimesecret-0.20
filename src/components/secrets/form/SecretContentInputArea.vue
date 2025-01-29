@@ -1,78 +1,67 @@
-
-<!--
-
-  FEATURE: Closing dropdown on click outside or Escape key press
-
-  1. Added `ref="dropdownRef"` to the dropdown container div.
-  2. Created a `closeDropdown` function to close the dropdown.
-  3. Added `handleClickOutside` function to check if a click occurred outside the dropdown.
-  4. Added `handleEscapeKey` function to close the dropdown when the Escape key is pressed.
-  5. Set up event listeners in the `onMounted` hook and removed them in the `onUnmounted` hook.
-
-  These changes will make the dropdown close when clicking outside of it or pressing the
-  Escape key. The click outside functionality checks if the click target is not contained
-  within the dropdown element, and if so, it closes the dropdown. The Escape key
-  functionality simply closes the dropdown when the key is pressed.
-
-  TESTING:
-  To test the readability and distinguishability of various characters,
-  including commonly problematic ones, use the following command to generate
-  a QR code. This will help validate how different characters are rendered
-  and perceived in different contexts:
-
-    $ qrencode -t UTF8i "5uP0R s3kRU7\!"
-
-    █▀▀▀▀▀█ ▄█ █▀ █▀▀▀▀▀█
-    █ ███ █ ▀█ ▄▀ █ ███ █
-    █ ▀▀▀ █ █  ▄█ █ ▀▀▀ █
-    ▀▀▀▀▀▀▀ █▄█▄█ ▀▀▀▀▀▀▀
-    ▀█▄▀  ▀▀ ▀▀▄ ▄▀▀█ ▀▀▄
-    █  █ █▀▄▄██▄▀ ▄ ▄█▀ █
-    ▀ ▀ ▀ ▀▀▄▀█▄█ ▄ ▀█▀██
-    █▀▀▀▀▀█ ▀▄█▀█▀▀█▀█▀
-    █ ███ █ ▄▀▀██▄█▄▄▀ ▄▄
-    █ ▀▀▀ █ ▄█▄ ▀▄ ▄▀ ▀ ▀
-    ▀▀▀▀▀▀▀ ▀   ▀▀  ▀ ▀▀
-
-  Here is a comprehensive string that includes a mix of problematic
-  characters (such as 'o', '0', 'l', '1', 'I') and regular
-  characters, numbers, and symbols:
-
-    a0oO1lI2b3c4d5e6f7g8h9iIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789!
-    @#$%^&*()_+-=[]{}|;:',.<>?/~`a0oO1lI2b3c4d5e6f7g8h9iIjJkKlLmMnNoOpPqQ
-    rRsStTuUvVwWxXyYzZ0123456789!@#$%^&*()_+-=[]{}|;:',.<>?/~`a0oO1lI2b3c
-    4d5e6f7g8h9iIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789!@#$%^&*()_+
-    -=[]{}|;:',.<>?/~`
-
-  Additionally, here are some leetspeak words to further test and
-  validate character rendering:
-
-    h3ll0 w0rld 1337 c0d3 pr0gr4mm3r h4ck3r s3cur1ty 3xpl01t 5up3r s3kRU7
-
--->
+<!-- src/components/secrets/form/SecretContentInputArea.vue -->
 
 <script setup lang="ts">
 /**
  * SecretContentInputArea Component
  *
- * This component provides a textarea for users to input secret content and optionally
- * select a domain from a dropdown. It handles the input of secret text, auto-resizing
- * of the textarea, and domain selection if enabled.
+ * A form component for secure content input with optional domain selection.
+ * Implements auto-resizing textarea, character counting, and domain dropdown functionality
+ * through composable functions.
  *
  * Features:
- * - Auto-resizing textarea for secret content input
- * - Optional domain selection dropdown
- * - Emits events for content and domain changes
- * - Handles closing of dropdown on outside click or Escape key press
+ * - Auto-resizing textarea with maximum height constraint
+ * - Real-time character counting with formatted display
+ * - Optional domain selection dropdown with outside click detection
+ * - Keyboard navigation support (Escape key handling)
+ * - Dark mode compatible
+ * - Accessibility compliant
+ *
+ * Technical Implementation:
+ * - Uses composition API with dedicated composables:
+ *   - useTextarea: Handles input, validation, and auto-resize
+ *   - useDropdown: Manages dropdown state and interactions
+ *   - useCharCounter: Provides character counting and formatting
+ *   - useDomainDropdown: Handles domain selection state
+ *
+ * Props:
+ * @prop {string[]} [availableDomains] - List of available domains for selection
+ * @prop {string} [initialDomain] - Initially selected domain
+ * @prop {boolean} [withDomainDropdown=false] - Enable/disable domain selection
+ * @prop {number} [maxLength=10000] - Maximum character limit
+ * @prop {string} [initialContent] - Initial textarea content
+ *
+ * Events:
+ * @emits {string} update:selected-domain - Emitted when domain selection changes
+ * @emits {string} update:content - Emitted when textarea content changes
  *
  * Usage:
+ * ```vue
  * <SecretContentInputArea
- *   :availableDomains="availableDomains"
- *   :initialDomain="selectedDomain"
- *   :withDomainDropdown="domainsEnabled"
- *   @update:selectedDomain="updateSelectedDomain"
- *   @update:content="secretContent = $event"
+ *   :availableDomains="['domain1.com', 'domain2.com']"
+ *   :initialDomain="defaultDomain"
+ *   :withDomainDropdown="true"
+ *   :maxLength="5000"
+ *   :initialContent="existingContent"
+ *   @update:selectedDomain="handleDomainChange"
+ *   @update:content="handleContentChange"
  * />
+ * ```
+ *
+ * Accessibility:
+ * - Proper ARIA labels for textarea and dropdown
+ * - Keyboard navigation support
+ * - Screen reader compatible character counter
+ * - Focus management for dropdown
+ *
+ * Performance Considerations:
+ * - Debounced textarea resizing
+ * - Efficient character counting
+ * - Optimized dropdown rendering (v-show vs v-if)
+ *
+ * @see {@link useTextarea} For textarea management implementation
+ * @see {@link useDropdown} For dropdown behavior implementation
+ * @see {@link useCharCounter} For character counting implementation
+ * @see {@link useDomainDropdown} For domain selection implementation
  */
  import OIcon from '@/components/icons/OIcon.vue';
  import { useCharCounter } from '@/composables/useCharCounter';
