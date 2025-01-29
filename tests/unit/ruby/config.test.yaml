@@ -160,7 +160,7 @@
       # :recognized_error, :all.
       tracking_event: :unrecognized_error
       stdout: true
-      # log_absolute_path: '/home/app/log/truemail.log'
+      # log_absolute_path: '/app/truemail.log'
 :locales:
   - en
   - ar

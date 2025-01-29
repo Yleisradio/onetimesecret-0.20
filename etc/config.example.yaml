@@ -193,7 +193,7 @@
       # One of: :error (default), :unrecognized_error, :recognized_error, :all.
       tracking_event: :error
       stdout: true
-      # log_absolute_path: '/home/app/log/truemail.log'
+      # log_absolute_path: '/app/truemail.log'
 :locales:
   # A list of ISO language codes (e.g., 'en' for English, 'es'
   # for Spanish, etc.). There is a corresponding file in etc/locales
