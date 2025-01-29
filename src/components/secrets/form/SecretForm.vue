@@ -180,11 +180,17 @@
                 <button
                   type="submit"
                   :disabled="!hasContent || isSubmitting"
-                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed dark:focus:ring-offset-slate-900">
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2
+                  rounded-lg bg-brand-600 p-3 h-[46px] text-sm font-semibold text-white
+                  transition-colors hover:bg-brand-700 focus:outline-none focus:ring-2
+                  focus:ring-brand-500 focus:ring-offset-2 disabled:bg-gray-400
+                  disabled:cursor-not-allowed dark:focus:ring-offset-slate-900"
+                >
                   <OIcon
                     collection="heroicons"
                     name="lock-closed"
-                    class="size-5" />
+                    class="size-5"
+                  />
                   <span>Create Link</span>
                 </button>
               </div>

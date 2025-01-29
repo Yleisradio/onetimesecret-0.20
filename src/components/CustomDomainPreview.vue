@@ -138,28 +138,45 @@
             ref="buttonRef"
             type="button"
             @click="isOpen = !isOpen"
-            class="w-full text-left appearance-none bg-transparent group cursor-pointer px-0 flex items-center font-mono focus:outline-none focus:ring-2 focus:ring-brandcomp-500/50 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-gray-800 rounded-sm transition-shadow overflow-hidden"
+            class="w-full text-left appearance-none bg-transparent group
+              cursor-pointer px-0 flex items-center font-brand
+              focus:outline-none focus:ring-2 focus:ring-brandcomp-500/50
+              focus:ring-offset-2 focus:ring-offset-gray-50
+              dark:focus:ring-offset-gray-800 rounded-sm transition-shadow"
             aria-haspopup="listbox"
             :aria-expanded="isOpen"
             :aria-label="`Select domain. Currently selected: ${selectedDomain}. Press Space or Enter to open dropdown`">
-            <div class="flex items-center min-w-0 flex-1">
+            <!-- Main content container with proper overflow handling -->
+            <div class="flex items-center min-w-0 flex-1 overflow-hidden">
+              <!-- Fixed width prefix -->
               <span class="flex-shrink-0 text-gray-600/50 dark:text-gray-600">https://</span>
-              <span
-                class="border-b-2 border-transparent truncate inline-block group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400 transition-colors flex-shrink-1 min-w-0"
-                >{{ selectedDomain }}</span>
+
+              <!-- Domain part - truncates if needed -->
+              <span class="border-b-2 border-transparent truncate
+                group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400
+                transition-colors min-w-0 flex-shrink">
+                {{ selectedDomain }}
+              </span>
+
+              <!-- Fixed width path separator -->
               <span class="flex-shrink-0 text-gray-600/50 dark:text-gray-600">/secret/</span>
-              <span
-                class="flex-shrink-1 bg-gradient-to-r from-gray-600/50 to-transparent bg-clip-text text-transparent"
-                >abcdef123456</span
-              >
+
+              <!-- Hash part - ensures truncation -->
+              <span class="truncate min-w-0 flex-shrink overflow-hidden
+                bg-gradient-to-r from-gray-600/50 to-transparent bg-clip-text text-transparent">
+                abcdef123456
+              </span>
             </div>
+
             <!-- Icon always visible -->
-                  <OIcon
-                    collection="heroicons"
-                    name="chevron-down"
-                    class="h-4 w-4 ml-1 flex-shrink-0 text-gray-400 group-hover:text-brandcomp-500
-                    dark:group-hover:text-brandcomp-400"
-                  />
+            <span class="flex-shrink-0 ml-1">
+              <OIcon
+                collection="heroicons"
+                name="chevron-down"
+                class="h-4 w-4 text-gray-400 group-hover:text-brandcomp-500
+                dark:group-hover:text-brandcomp-400"
+              />
+            </span>
           </button>
 
           <div
