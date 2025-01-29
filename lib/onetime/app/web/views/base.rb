@@ -23,6 +23,7 @@ module Onetime
         @locale ||= req.env['ots.locale'] || OT.conf[:locales].first.to_s || 'en' unless req.nil?
         @messages ||= []
         site = OT.conf.fetch(:site, {})
+        experimental = OT.conf.fetch(:experimental, {})
         is_default_locale = OT.conf[:locales].first.to_s == locale
         supported_locales = OT.conf.fetch(:locales, []).map(&:to_s)
 
@@ -86,6 +87,10 @@ module Onetime
         ensure_exist = [:domains_enabled, :custid, :cust, :email, :customer_since, :custom_domains]
 
         self[:jsvars][:domains_enabled] = jsvar(domains_enabled) # only for authenticated
+
+        self[:jsvars][:features] = jsvar({
+          markdown: experimental.dig(:markdown, :enabled) || false,
+        })
 
         if authenticated && cust
           self[:jsvars][:custid] = jsvar(cust.custid)

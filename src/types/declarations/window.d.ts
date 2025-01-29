@@ -91,4 +91,8 @@ export interface OnetimeWindow {
   domain_logo: ImageProps;
 
   messages: Message[];
+
+  features: {
+    markdown: boolean;
+  };
 }

@@ -99,6 +99,7 @@ module Onetime
       exit 10
     rescue StandardError => e
       OT.le "Unexpected error `#{e}` (#{e.class})"
+      OT.ld e.backtrace.join("\n")
       exit 99
     end
 

@@ -96,9 +96,12 @@ export const stateFixture: OnetimeWindow = {
     filename: '',
   },
   messages: [],
+  features: {
+    markdown: false,
+  },
 } as const;
 
 // Export the window fixture with the new structure
 export const windowFixture = {
   __ONETIME_STATE__: stateFixture,
-} as Window & typeof globalThis;
+} as unknown as Window & typeof globalThis;
