@@ -141,14 +141,15 @@
           aria-haspopup="listbox"
           :aria-expanded="isOpen"
           :aria-label="`Select domain. Currently selected: ${selectedDomain}. Press Space or Enter to open dropdown`">
+
           <!-- Main content container with proper overflow handling -->
           <div class="flex items-center min-w-0 flex-1 overflow-hidden">
             <!-- Fixed width prefix -->
             <span class="flex-shrink-0 text-gray-600/50 dark:text-gray-600">https://</span>
 
-            <!-- Domain part - truncates if needed -->
+            <!-- Domain part -->
             <span
-              class="border-b-2 border-transparent truncate group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400 transition-colors min-w-0 flex-shrink">
+              class="border-b-2 border-transparent group-hover:border-brandcomp-500 dark:group-hover:border-brandcomp-400 transition-colors min-w-0 flex-shrink">
               {{ selectedDomain }}
             </span>
 
