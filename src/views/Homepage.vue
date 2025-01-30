@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import HomepagePlansCTA from '@/components/ctas/HomepagePlansCTA.vue';
   import HomepageTaglines from '@/components/HomepageTaglines.vue';
-  import HomepageLinksPlaceholder from '@/components/secrets/HomepageLinksPlaceholder.vue';
   import SecretForm from '@/components/secrets/form/SecretForm.vue';
   import { WindowService } from '@/services/window.service';
   import { computed } from 'vue';

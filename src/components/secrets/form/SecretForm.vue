@@ -12,6 +12,7 @@
   import SecretLinksTable from '../SecretLinksTable.vue';
   import HomepageLinksPlaceholder from '../HomepageLinksPlaceholder.vue';
   import { nanoid } from 'nanoid';
+  import { type ConcealedMessage } from '@/types/ui/concealed-message';
 
   export interface Props {
     enabled?: boolean;
@@ -34,23 +35,23 @@
   const showFinalNotice = ref(false);
   const showProTip = ref(props.withAsterisk);
 
-  const createdSecrets = ref<Array<{
-    id: string;
-    url: string;
-    hasPassphrase: boolean;
-    ttl: number;
-    createdAt: Date;
-  }>>([]);
+  const concealedMessages = ref<ConcealedMessage[]>([]);
 
   const { form, validation, operations, isSubmitting, submit } = useSecretConcealer({
     onSuccess: async (response) => {
-      createdSecrets.value.unshift({
+
+      const newMessage: ConcealedMessage = {
         id: nanoid(),
-        url: window.location.origin + '/secret/' + response.record.metadata.key,
-        hasPassphrase: !!form.passphrase,
-        ttl: form.ttl,
-        createdAt: new Date(),
-      });
+        metadata_key: response.record.metadata.key,
+        secret_key: response.record.secret.key,
+        response,
+        clientInfo: {
+          hasPassphrase: !!form.passphrase,
+          ttl: form.ttl,
+          createdAt: new Date(),
+        },
+      };
+      concealedMessages.value.unshift(newMessage);
       operations.reset();
       secretContentInput.value?.clearTextarea(); // Clear textarea
 
@@ -250,8 +251,8 @@
       </div>
     </form>
 
-    <template v-if="createdSecrets.length > 0">
-      <SecretLinksTable :secrets="createdSecrets" />
+    <template v-if="concealedMessages.length > 0">
+      <SecretLinksTable :concealedMessages="concealedMessages" />
     </template>
     <template v-else>
       <HomepageLinksPlaceholder
