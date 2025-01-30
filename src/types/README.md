@@ -30,64 +30,48 @@ ui/
 
 ## Directory Relationships
 
-- `src/schemas/` - Zod schemas and validation
-- `src/types/` - TypeScript types and interfaces
-- `src/types/ui/` - UI-specific types spanning components
-
-### `src/schemas/`
-- Zod schemas for runtime validation
-- Types inferred from these schemas
-- Contains:
-  - Domain models
-  - API request/response schemas
-  - Error handling schemas
-  - Validation rules
-
-### `src/types/`
-- Global TypeScript types
-- Application-wide declarations
-- Contains:
-  - Declaration files (.d.ts)
-  - Global interfaces
-  - Environment types
-  - Window augmentations
-
-### `src/types/ui/`
-- UI-specific types spanning components
-- No runtime validation needed
-- Represents:
-  - Component props/emits
-  - Shared component state
-  - UI feature interfaces
-  - Layout/display types
-
-## Type Source of Truth
-
-- API/Model types: Inferred from Zod schemas in `src/schemas/`
-- Global types: Declared in `src/types/`
-- UI types: Declared in `src/types/ui/`
-
-
-### Example
+### Type Source of Truth
+- `src/schemas/*` - Zod schemas with inferred types for domain models and API contracts
+- `src/types/*` - Global TypeScript declarations and interfaces
+- `src/types/ui/*` - Component-spanning UI type definitions
 
 ```typescript
-// src/types/ui/secret-links.ts
-export interface SecretLink {
-  id: string;
-  clientInfo: {
-    hasPassphrase: boolean;
-    ttl: number;
-    createdAt: Date;
-  };
+// Example: Type Sources
+
+// Domain/API types (src/schemas/models/secret.ts)
+export const SecretSchema = z.object({...})
+export type Secret = z.infer<typeof SecretSchema>
+
+// Global types (src/types/declarations/global.d.ts)
+declare global {
+  interface Window {
+    config: AppConfig
+  }
+}
+
+// UI types (src/types/ui/secret-links.ts)
+export interface SecretLinkDisplay {
+  id: string
+  formattedDate: string
+  status: DisplayStatus
 }
 ```
 
-## Guidelines
 
-- Keep types close to where they're used
-- Use meaningful, feature-based file names
+## Usage Guidelines
+
+### When to Use Each Directory
+- `src/schemas/*` - For any types requiring runtime validation
+- `src/types/*` - For global type declarations and shared interfaces
+- `src/types/ui/*` - For component-spanning UI types without validation needs
+
+### Best Practices
+- Keep types close to their usage
+- Use feature-based file names
+- Prefer interfaces for object shapes
+- Use types for unions/intersections
+- Avoid type duplication across directories
 - Re-export commonly used types through index files
-- Avoid duplicating types across directories
 
 ### When to Use
 - Default to `interface` for object shapes unless specific Zod, `type` or `class` features are needed.
