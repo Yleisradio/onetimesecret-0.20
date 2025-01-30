@@ -2,7 +2,7 @@
 <script setup lang="ts">
   import { ref } from 'vue';
 
-  const props = defineProps({
+  defineProps({
     title: { type: String, default: 'No secrets yet' },
     description: { type: String, default: 'Create a secret above to get started.' },
   });
@@ -45,7 +45,7 @@
              var(--tw-gradient-to) 100%)`
           : '',
       }"
-      aria-hidden="true" />
+      aria-hidden="true"></div>
 
     <h3
       class="relative text-lg font-medium text-gray-500 dark:text-gray-100 mb-2"
@@ -62,7 +62,7 @@
     <!-- Focus outline for keyboard navigation -->
     <div
       class="absolute inset-0 rounded-lg ring-2 ring-offset-2 ring-blue-500 opacity-0 focus-within:opacity-100"
-      aria-hidden="true" />
+      aria-hidden="true"></div>
   </div>
 </template>
 

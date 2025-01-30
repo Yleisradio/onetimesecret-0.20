@@ -21,9 +21,9 @@
   import OIcon from '@/components/icons/OIcon.vue';
   import { useDomainDropdown } from '@/composables/useDomainDropdown';
   import { useDropdown } from '@/composables/useDropdown';
-  import { onClickOutside, onKeyStroke } from '@vueuse/core';
-  import { watch, ref } from 'vue';
   import { WindowService } from '@/services/window.service';
+  import { onClickOutside, onKeyStroke } from '@vueuse/core';
+  import { ref, watch } from 'vue';
 
   const props = withDefaults(
     defineProps<{

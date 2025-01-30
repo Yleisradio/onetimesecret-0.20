@@ -1,7 +1,7 @@
 <!-- src/components/secrets/form/SecretForm.vue -->
 <script setup lang="ts">
   import { computed, watch, onMounted, ref } from 'vue';
-  import { useRouter } from 'vue-router';
+  // import { useRouter } from 'vue-router';
   import BasicFormAlerts from '@/components/BasicFormAlerts.vue';
   import OIcon from '@/components/icons/OIcon.vue';
   import SecretContentInputArea from './SecretContentInputArea.vue';
@@ -28,10 +28,10 @@
     withGenerate: false,
   });
 
-  const router = useRouter();
+  // const router = useRouter();
   const productIdentity = useProductIdentity();
   const passphraseVisible = ref(false);
-  const mode = ref<'write' | 'preview'>('write');
+  // const mode = ref<'write' | 'preview'>('write');
   const showFinalNotice = ref(false);
   const showProTip = ref(props.withAsterisk);
 
@@ -115,7 +115,7 @@
           <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-100 dark:bg-gray-800">
             <div
               class="h-full bg-blue-600 dark:bg-blue-500 rounded-r transition-all duration-300"
-              :style="{ width: `${completionProgress}%` }" />
+              :style="{ width: `${completionProgress}%` }"></div>
           </div>
         </div>
 
