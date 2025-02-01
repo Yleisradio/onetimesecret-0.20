@@ -1,6 +1,7 @@
 <!-- src/components/secrets/form/SecretContentInputArea.vue -->
+
 <script setup lang="ts">
-  import OIcon from '@/components/icons/OIcon.vue';
+
   import { useCharCounter } from '@/composables/useCharCounter';
   import { useTextarea } from '@/composables/useTextarea';
   import { computed, watch } from 'vue';
@@ -71,7 +72,7 @@
       autocomplete="off"
       autofocus
       @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave" />
+      @mouseleave="handleMouseLeave"></textarea>
 
     <!-- Character Counter -->
     <transition
