@@ -1,7 +1,6 @@
 <!-- src/components/secrets/form/SecretContentInputArea.vue -->
 
 <script setup lang="ts">
-
   import { useCharCounter } from '@/composables/useCharCounter';
   import { useTextarea } from '@/composables/useTextarea';
   import { computed, watch } from 'vue';
@@ -10,6 +9,7 @@
     defineProps<{
       maxLength?: number;
       initialContent?: string;
+      cornerClass?: string;
       disabled?: boolean;
     }>(),
     {
@@ -27,7 +27,7 @@
     onContentChange: (newContent) => emit('update:content', newContent),
   });
 
-  const { isHovering, handleMouseEnter, handleMouseLeave, formatNumber } = useCharCounter();
+  const { isHovering, formatNumber } = useCharCounter();
 
   // Computed properties
   const showCounter = computed(() => isHovering.value || charCount.value > props.maxLength! / 2);
@@ -36,12 +36,12 @@
 
   const formattedMaxLength = computed(() => formatNumber(props.maxLength!));
 
-  const statusColor = computed(() => {
-    const percentage = charCount.value / props.maxLength!;
-    if (percentage < 0.8) return 'bg-emerald-400 dark:bg-emerald-500';
-    if (percentage < 0.95) return 'bg-amber-400 dark:bg-amber-500';
-    return 'bg-red-400 dark:bg-red-500';
-  });
+  // const statusColor = computed(() => {
+  //   const percentage = charCount.value / props.maxLength!;
+  //   if (percentage < 0.8) return 'bg-emerald-400 dark:bg-emerald-500';
+  //   if (percentage < 0.95) return 'bg-amber-400 dark:bg-amber-500';
+  //   return 'bg-red-400 dark:bg-red-500';
+  // });
 
   // Watch for changes to emit updates
   watch(content, (newContent) => {
@@ -59,39 +59,66 @@
       :disabled="disabled"
       @input="checkContentLength"
       :maxlength="maxLength"
-      class="block w-full min-h-[200px] resize-none
-            rounded-lg border border-gray-200
-            p-4 font-mono text-base leading-relaxed
-            text-gray-900 placeholder:text-gray-400
-            focus:border-blue-500 focus:ring-2 focus:ring-blue-500
-            disabled:bg-gray-50 disabled:text-gray-500
-            dark:border-gray-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400
-            transition-all duration-200"
+      :class="[cornerClass]"
+      class="block w-full min-h-[200px] resize-none rounded-lg border border-gray-200 p-4 font-mono text-base leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500 dark:border-gray-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 transition-all duration-200"
       :placeholder="$t('web.COMMON.secret_placeholder')"
-      aria-label="Message content"
-      autocomplete="off"
-      autofocus
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"></textarea>
+      aria-label="Enter the secret content to share here">
+    </textarea>
 
-    <!-- Character Counter -->
-    <transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 translate-y-2">
+    <!--
+      Generally speaking, v-if has higher toggle costs while v-show has higher
+      initial render costs. So prefer v-show if you need to toggle something
+      very often, and prefer v-if if the condition is unlikely to change at
+      runtime. -- https://vuejs.org/guide/essentials/conditional.html#v-if-vs-v-show
+    -->
+    <div
+      v-if="showCounter"
+      class="pointer-events-none select-none hidden rounded-full bg-white px-3 py-1 text-sm text-gray-400 shadow-sm transition-colors duration-200 dark:bg-gray-800 dark:text-gray-500">
+      {{
+        $t('formattedcharcount-formattedmaxlength-chars', [formattedCharCount, formattedMaxLength])
+      }}
+    </div>
+
+    <div
+      v-if="withDomainDropdown"
+      class="absolute bottom-4 right-4">
       <div
-        v-show="showCounter"
-        class="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-gray-900/90 px-3 py-1.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-all dark:bg-white/90 dark:text-gray-900"
-        role="status"
-        aria-live="polite">
+        class="relative inline-block text-left"
+        ref="dropdownRef">
+        <button
+          type="button"
+          @click="toggleDropdown"
+          class="inline-flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brandcomp-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800">
+          <span class="max-w-[150px] truncate">
+            {{ selectedDomain || 'Select Domain' }}
+          </span>
+          <OIcon
+            collection="heroicons"
+            name="chevron-down-16-solid"
+            class="ml-2 size-5 shrink-0 text-gray-400 dark:text-gray-500"
+            aria-hidden="true" />
+        </button>
+
         <div
-          class="h-2 w-2 rounded-full transition-colors"
-          :class="statusColor"></div>
-        {{ formattedCharCount }}/{{ formattedMaxLength }}
+          v-if="isOpen"
+          class="absolute right-0 z-50 mt-2 max-h-60 w-56 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700">
+          <div
+            class="py-1"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="options-menu">
+            <a
+              v-for="domain in availableDomains"
+              :key="domain"
+              href="#"
+              @click.prevent="selectDomain(domain)"
+              class="block px-4 py-2 text-sm text-gray-700 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+              role="menuitem">
+              {{ domain }}
+            </a>
+          </div>
+        </div>
       </div>
-    </transition>
+    </div>
   </div>
 </template>

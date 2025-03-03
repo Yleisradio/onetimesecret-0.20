@@ -22,8 +22,8 @@
 :incoming: include(':incoming', required=False)
 :emailer: include(':emailer')
 :mail: include(':mail')
-:locales: list(str())
-:services: include(':services')
+:internationalization: include(':internationalization', required=False)
+:diagnostics: include(':diagnostics', required=False)
 :limits: include(':limits')
 :stathat: include(':stathat', required=False)
 :development: include(':development')
@@ -155,15 +155,40 @@
     :not_rfc_mx_lookup_flow: bool()
     :email_pattern: str(required=False)
     :smtp_error_body_pattern: str(required=False)
+    # TODO: Double check whether the prefix'd colons have been removed before merging with develop
     :logger:
-      tracking_event: str(required=False)
-      stdout: bool(required=False)
-      log_absolute_path: str(required=False)
+      :tracking_event: str(required=False)
+      :stdout: bool(required=False)
+      :log_absolute_path: str(required=False)
 
-:services:
-  :sentry:
-    :dsn: str()
-    :enabled: any()
+:internationalization:
+  :enabled: any(bool(), str())
+  :default_locale: str()
+  :fallback_locale: map(list(str()))
+  :locales: list(str())
+  :incomplete: list(str(), required=False)
+
+:diagnostics:
+  :enabled: any(bool(), str())
+  :sentry: include(':sentry_diagnostics')
+
+:sentry_diagnostics:
+  :defaults: include(':sentry_defaults')
+  :backend: include(':sentry_backend')
+  :frontend: include(':sentry_frontend')
+
+:sentry_defaults:
+  :dsn: any(str(), null())
+  :sampleRate: any(str(), num())
+  :maxBreadcrumbs: any(str(), int())
+  :logErrors: any(bool(), str())
+
+:sentry_backend:
+  :dsn: any(str(), null())
+
+:sentry_frontend:
+  :dsn: any(str(), null())
+  :trackComponents: any(bool(), str())
 
 :limits:
   :check_status: int()

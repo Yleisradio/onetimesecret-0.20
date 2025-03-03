@@ -123,6 +123,7 @@
 <template>
   <div
     v-if="withDomainDropdown"
+    :title="$t('link-preview')"
     class="mb-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 border-dashed">
     <div class="flex items-center font-mono text-gray-600 dark:text-gray-400">
       <OIcon
