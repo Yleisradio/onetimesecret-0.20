@@ -78,47 +78,5 @@
         $t('formattedcharcount-formattedmaxlength-chars', [formattedCharCount, formattedMaxLength])
       }}
     </div>
-
-    <div
-      v-if="withDomainDropdown"
-      class="absolute bottom-4 right-4">
-      <div
-        class="relative inline-block text-left"
-        ref="dropdownRef">
-        <button
-          type="button"
-          @click="toggleDropdown"
-          class="inline-flex w-full items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brandcomp-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-800">
-          <span class="max-w-[150px] truncate">
-            {{ selectedDomain || 'Select Domain' }}
-          </span>
-          <OIcon
-            collection="heroicons"
-            name="chevron-down-16-solid"
-            class="ml-2 size-5 shrink-0 text-gray-400 dark:text-gray-500"
-            aria-hidden="true" />
-        </button>
-
-        <div
-          v-if="isOpen"
-          class="absolute right-0 z-50 mt-2 max-h-60 w-56 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700">
-          <div
-            class="py-1"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="options-menu">
-            <a
-              v-for="domain in availableDomains"
-              :key="domain"
-              href="#"
-              @click.prevent="selectDomain(domain)"
-              class="block px-4 py-2 text-sm text-gray-700 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
-              role="menuitem">
-              {{ domain }}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
