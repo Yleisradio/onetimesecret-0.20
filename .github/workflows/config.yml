@@ -28,15 +28,17 @@ jobs:
   yaml-schema-validation:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout
-      - uses: nrkno/yaml-schema-validator-github-action@v5
-        with:
-          schema: config/config.schema.yaml
-          target: config/config.example.yaml
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: nrkno/yaml-schema-validator-github-action@v5
+      - uses: nrkno/yaml-schema-validator-github-action@v4
         with:
-          schema: config/config.schema.yaml
+          schema: etc/config.schema.yaml
+          target: etc/config.example.yaml
+
+      - uses: nrkno/yaml-schema-validator-github-action@v4
+        with:
+          schema: etc/config.schema.yaml
           target: tests/unit/ruby/config.test.yaml
           # Disable strict checks for test config
           no-strict: true
