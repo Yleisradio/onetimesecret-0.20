@@ -1,3 +1,4 @@
+<!-- src/components/secrets/form/SecretContentInputArea.vue -->
 
 <!--
 

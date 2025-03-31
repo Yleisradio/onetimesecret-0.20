@@ -39,9 +39,9 @@ export function createErrorBoundary(options: ErrorBoundaryOptions = {}): Plugin 
        * @see https://vuejs.org/api/application#app-config-errorhandler
        */
       app.config.errorHandler = (error, instance, info) => {
-        const { client, scope } = inject(SENTRY_KEY) as SentryInstance;
+        const sentry = inject(SENTRY_KEY, null) as SentryInstance | null;
 
-        if (!client) {
+        if (!sentry?.client) {
           console.debug('Sentry not initialized');
           return;
         }
@@ -53,7 +53,7 @@ export function createErrorBoundary(options: ErrorBoundaryOptions = {}): Plugin 
         if (errorGuards.isOfHumanInterest(classifiedError) && options.notify) {
           options.notify(classifiedError.message, classifiedError.severity);
         }
-
+        const scope = sentry?.scope;
         console.debug('[GlobalErrorBoundary] Sending to Sentry', { scope, error });
         scope.captureException(error);
 
