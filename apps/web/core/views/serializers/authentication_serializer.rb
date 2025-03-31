@@ -45,6 +45,11 @@ module Core
           end
         end
 
+        # NOTE: We need to do this expressly here to avoid the customer object
+        # from being serialized to a string before JSON. Customer#to_s returns
+        # the identifier only so by the time this gets to Vues that's all it is.
+        output[:cust] = output[:cust].to_h unless output[:cust].nil?
+
         output
       end
 
