@@ -176,8 +176,7 @@ COPY package.json pnpm-lock.yaml tsconfig.json vite.config.ts postcss.config.mjs
 
 # Remove pnpm after use
 RUN set -eux \
-  && pnpm run type-check \
-  && pnpm run build-only \
+  && pnpm run build \
   && pnpm prune --prod \
   && rm -rf node_modules \
   && npm uninstall -g pnpm
@@ -206,6 +205,7 @@ COPY --from=build $CODE_ROOT/public $CODE_ROOT/public
 COPY --from=build $CODE_ROOT/templates $CODE_ROOT/templates
 COPY --from=build $CODE_ROOT/src $CODE_ROOT/src
 COPY bin $CODE_ROOT/bin
+COPY apps $CODE_ROOT/apps
 COPY etc $CODE_ROOT/etc
 COPY lib $CODE_ROOT/lib
 COPY migrate $CODE_ROOT/migrate

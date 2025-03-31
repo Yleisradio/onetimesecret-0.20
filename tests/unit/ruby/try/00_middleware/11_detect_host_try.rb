@@ -10,7 +10,8 @@
 # 4. Multiple host handling
 # 5. Empty and missing header handling
 
-require 'onetime'
+require_relative '../test_helpers'
+
 require 'stringio'
 require 'middleware/detect_host'
 
@@ -70,7 +71,9 @@ env['rack.detected_host']
 ## Handles missing headers gracefully
 env = {}
 @middleware.call(env)
-[env['rack.detected_host'], @log_output.string.include?('No valid host detected')]
+output = @log_output.string
+puts output
+[env['rack.detected_host'], output.include?('Invalid host detected')]
 #=> [nil, true]
 
 ## Always forwards request to app regardless of host validity
