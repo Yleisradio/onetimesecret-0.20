@@ -1,0 +1,33 @@
+name: ecr deploy
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set environment variables
+      shell: bash
+      run: |
+        VERSION=$([ "$GITHUB_REF_NAME" == "master" ] && echo "1.2.${GITHUB_RUN_NUMBER}" || echo "0.2.${GITHUB_RUN_NUMBER}-${GITHUB_REF_NAME//\//-}")
+        echo "VERSION_NUMBER=$VERSION" | tee -a $GITHUB_ENV
+        echo "DOCKER_IMAGE=$(echo $GITHUB_REPOSITORY | cut -f 2 -d/)" | tee -a $GITHUB_ENV
+    - name: Run build script
+      run: docker build -t "$DOCKER_IMAGE" .
+    - name: Run test script
+      run: |
+        echo "Starting the server"
+        docker run -d --name onetimesecret -p 7143:7143 -e OTS_SECRET=verysecret "$DOCKER_IMAGE"
+        sleep 5
+        echo "Logs:"
+        docker logs onetimesecret
+        echo "Testing /api/v1/status"
+        curl -i --fail 'http://127.0.0.1:7143/api/v1/status'
+    - name: Run deploy script
+      env:
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_EC2_METADATA_DISABLED: true
+      run: ./scripts/ci/publish-image.sh
