@@ -1,0 +1,20 @@
+version: 2
+
+project:
+  name: onetimesecret
+  type: eks
+  infra_repo:
+    uri: git@github.com:Yleisradio/yle-aws-infra.git
+    dir: terraform/onetimesecret-vpcv2
+
+environment:
+  eks:
+    _default:
+      OTS_SECRET: _SSM
+      REDIS_AUTH: _SSM
+    test:
+      ENVIRONMENT: "test"
+      DOMAIN: "secrets-test.aws.yle.fi"
+    prod:
+      ENVIRONMENT: "production"
+      DOMAIN: "secrets.aws.yle.fi"
