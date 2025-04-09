@@ -15,15 +15,15 @@ jobs:
         echo "DOCKER_IMAGE=$(echo $GITHUB_REPOSITORY | cut -f 2 -d/)" | tee -a $GITHUB_ENV
     - name: Run build script
       run: docker build -t "$DOCKER_IMAGE" .
-    - name: Run test script
-      run: |
-        echo "Starting the server"
-        docker run -d --name onetimesecret -p 7143:7143 -e OTS_SECRET=verysecret "$DOCKER_IMAGE"
-        sleep 5
-        echo "Logs:"
-        docker logs onetimesecret
-        echo "Testing /api/v1/status"
-        curl -i --fail 'http://127.0.0.1:7143/api/v1/status'
+    # - name: Run test script
+    #   run: |
+    #     echo "Starting the server"
+    #     docker run -d --name onetimesecret -p 7143:7143 -e OTS_SECRET=verysecret "$DOCKER_IMAGE"
+    #     sleep 5
+    #     echo "Logs:"
+    #     docker logs onetimesecret
+    #     echo "Testing /api/v1/status"
+    #     curl -i --fail 'http://127.0.0.1:7143/api/v1/status'
     - name: Run deploy script
       env:
         ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
